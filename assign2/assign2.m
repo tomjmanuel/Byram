@@ -1,4 +1,5 @@
 %% Assignment 2 Tom Manuel
+% Part 4
 close all
 clear all
 load('pointTargetData.mat')
@@ -97,7 +98,8 @@ xlabel('Xe (mm)')
 ylabel('Depth (mm)')
 
 
-%% Repeat all steps but for cyst
+%% Still Part 4
+% Repeat all steps but for cyst
 close all
 clear all
 load('anecoicCystData.mat')
@@ -171,9 +173,63 @@ ylabel('Depth (mm)')
 axis image
 
 
-%%
+%% Part 5, Continuous delay and sum
+close all
+clear all
+load('pointTargetData.mat')
+data = veraStrct.data;
+%imagesc(data(:,:,64),[-100 100])
 
+%First I will create a grid that represents the x and z coordinates of each
+%pixel in physical space
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
 
+%get Nx,dx,Nz, and dz
+foo = size(data);
+Nz = foo(1);
+% woah do you have to guess c to get dz??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1500; %m/s
+dz = .5 * c / 20E6;
 
+% build coordinate matrices
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
 
+% set focus (in meters)
+xf = 0;
+zf = .04; %vector
 
+% create a time vector
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+% calculate delay
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze).^2) + Ze/c; %[s]
+%Trx = Trx - min(Trx(:));
+Trx = Trx - repmat(min(Trx,[],2),[1 Nx]);
+%
+h=waitbar(0,'processing');
+datad = zeros(size(data)); %delayed data
+for i=1:128
+    datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(:,i)','linear');
+    waitbar(i/128,h);
+end 
+close(h);
+
+% sum
+imf = squeeze(sum(datad,2)); %sum
+imf(isnan(imf))=-1000; %interp1 drops some Nans in here
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% image of delayed and summed data
+Zvec = dz.*linspace(0,Nz-1,Nz); % z axis for plotting time
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Dynamically focused')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
