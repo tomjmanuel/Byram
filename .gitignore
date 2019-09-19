@@ -1,2 +1,5 @@
 # pdfs
 *.pdf
+
+# .mat's
+*.mat
