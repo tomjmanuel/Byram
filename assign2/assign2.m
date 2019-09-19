@@ -199,7 +199,6 @@ Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
 
 % set focus (in meters)
 xf = 0;
-zf = .04; %vector
 
 % create a time vector
 fs = veraStrct.samplingRateMHz;
@@ -233,3 +232,160 @@ title('Dynamically focused')
 xlabel('Xe (mm)')
 ylabel('Depth (mm)')
 axis image
+
+%% Part 5b, Continuous delay and sum (cyst data)
+close all
+clear all
+load('anecoicCystData.mat')
+data = veraStrct.data;
+%imagesc(data(:,:,64),[-100 100])
+
+%First I will create a grid that represents the x and z coordinates of each
+%pixel in physical space
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+%get Nx,dx,Nz, and dz
+foo = size(data);
+Nz = foo(1);
+% woah do you have to guess c to get dz??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1500; %m/s
+dz = .5 * c / 20E6;
+
+% build coordinate matrices
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+% set focus (in meters)
+xf = 0;
+
+% create a time vector
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+% calculate delay
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze).^2) + Ze/c; %[s]
+%Trx = Trx - min(Trx(:));
+Trx = Trx - repmat(min(Trx,[],2),[1 Nx]);
+%
+h=waitbar(0,'processing');
+datad = zeros(size(data)); %delayed data
+for i=1:128
+    datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(:,i)','linear');
+    waitbar(i/128,h);
+end 
+close(h);
+
+% sum
+imf = squeeze(sum(datad,2)); %sum
+imf(isnan(imf))=-1000; %interp1 drops some Nans in here
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% image of delayed and summed data
+Zvec = dz.*linspace(0,Nz-1,Nz); % z axis for plotting time
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Dynamically focused')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+
+%% Part 6 Parallel imaging
+% adapted from dynamic focus code... as if that weren't complicated enough
+% each foci will have a slightly different delay profile
+% so calculate a Trx for each
+close all
+clear all
+
+pff = 4; % parallel focus factor (2,4,8,16)
+
+load('pointTargetData.mat')
+data = veraStrct.data;
+
+%First I will create a grid that represents the x and z coordinates of each
+%pixel in physical space
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+%get Nx,dx,Nz, and dz
+foo = size(data);
+Nz = foo(1);
+% woah do you have to guess c to get dz??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1500; %m/s
+dz = .5 * c / 20E6;
+
+% build coordinate matrices
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+% create lateral foci vector
+Xf = linspace(-dx,dx,pff);
+
+Trx = zeros([Nz,Nx,pff]);
+% calculate delay for each focus
+for i=1:pff
+    ttemp = (1/c)*sqrt((Xe-Xf(i)).^2 + (Ze).^2) + Ze/c; %[s] temp delay matrix [Nz x Nx]
+    %Trx = Trx - min(Trx(:));
+    Trx(:,:,i) = ttemp - repmat(min(ttemp,[],2),[1 Nx]);
+end
+
+% create a time vector
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+% takeaway beams to artificially simulate parallel foci
+nBeams = foo(3);
+datar = zeros([Nz,Nx,nBeams/pff]); %reduced data [Nz,Nx,nbeams/par_foc_factor]
+f=1;
+for i=1:pff:nBeams
+    datar(:,:,f)=data(:,:,i);
+    f=f+1;
+end
+
+%Now loop through datar and apply delays
+bar = nBeams/pff;
+datad = zeros([Nz Nx bar pff]); %[Nz Nx nBeams/pff pff]
+
+%
+bar = nBeams/pff;
+for i=1:nBeams/pff
+    for j=1:pff
+        datad(:,i,:,j) = interp1(t,datar(:,i,:),t+squeeze(Trx(:,i,j))','linear');
+    end
+end
+
+%
+% now reshape data becuase my parallel beams are in the 4th dimension
+dataF = zeros(foo);%original data size
+for i=1:bar
+    for j=1:pff
+        dataF(:,:,i*pff -pff+j) = datad(:,:,i,j);
+    end
+end
+
+% sum
+imf = squeeze(sum(dataF(:,:,:,1),2)); %sum
+imf(isnan(imf))=-1000; %interp1 drops some Nans in here
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% image of delayed and summed data
+Zvec = dz.*linspace(0,Nz-1,Nz); % z axis for plotting time
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Parallel Imaging')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+
+
+
+
+
