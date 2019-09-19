@@ -1,0 +1,515 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Assign1</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-09"><meta name="DC.source" content="Assign1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Part A</a></li><li><a href="#3">Part B</a></li><li><a href="#4">Part C</a></li><li><a href="#5">Part D</a></li><li><a href="#6">5a Ex:6.1(page 62 USERGUIDE)</a></li><li><a href="#7">5b Ex:6.2</a></li></ul></div><pre class="codeinput"><span class="comment">% Assignment 1 Problem 4 &amp; 5</span>
+<span class="comment">% Tom Manuel</span>
+</pre><h2 id="2">Part A</h2><pre class="codeinput">f0 = 1E6;
+fs = 40E6;
+c=1540;
+
+<span class="comment">%create time</span>
+<span class="comment">%first figure out how many points to use in time as to cover</span>
+<span class="comment">%exactly 3 cycles</span>
+ncyc = 3;
+T = 1/f0;
+npts = ncyc*T*fs; <span class="comment">%number of points</span>
+t = linspace(0,T*3,npts);
+
+<span class="comment">%point along x axis (m)</span>
+x = 2E-6;
+
+<span class="comment">%get wavenumber (k)</span>
+<span class="comment">%k = 2pi /lamda</span>
+k = 2 * pi / (c/f0 );
+
+<span class="comment">%create sinusoid</span>
+<span class="comment">% A*sin(wt+kx)</span>
+X = 1*sin(2*pi*f0*t+ k*x);
+close <span class="string">all</span>
+plot(t,X)
+xlabel(<span class="string">'time (s)'</span>)
+ylabel(<span class="string">'amplitude'</span>)
+</pre><img vspace="5" hspace="5" src="Assign1_01.png" alt=""> <h2 id="3">Part B</h2><pre class="codeinput"><span class="comment">%sig from Part A</span>
+X = 1*sin(2*pi*f0*t+ k*x);
+
+<span class="comment">% create same signal shifted Pi/8</span>
+phase = pi/8;
+X2 = 1*sin(2*pi*f0*t+ k*x + phase);
+close <span class="string">all</span>
+plot(t,X,t,X2)
+legend(<span class="string">'X'</span>,<span class="string">'X shifted'</span>)
+xlabel(<span class="string">'time (s)'</span>)
+ylabel(<span class="string">'amplitude'</span>)
+</pre><img vspace="5" hspace="5" src="Assign1_02.png" alt=""> <h2 id="4">Part C</h2><pre class="codeinput"><span class="comment">% get the time value corresponded to a phase shift of pi/8</span>
+<span class="comment">% 2pi = 1/f0, 2pi/pi/8= 16, shift = (1/f0)/16</span>
+shift = -(1/f0)/16;
+
+Xnear = interp1(t,X2,t+shift,<span class="string">'nearest'</span>);
+Xlin = interp1(t,X2,t+shift,<span class="string">'linear'</span>);
+Xspline = interp1(t,X2,t+shift,<span class="string">'spline'</span>);
+close <span class="string">all</span>
+plot(t,X,t,X2,t,Xnear,t,Xlin,t,Xspline)
+legend(<span class="string">'X'</span>,<span class="string">'X2'</span>,<span class="string">'Nearest'</span>,<span class="string">'Linear'</span>,<span class="string">'Spline'</span>)
+xlim([2E-6 2.5E-6])
+xlabel(<span class="string">'time (s)'</span>)
+ylabel(<span class="string">'amplitude'</span>)
+</pre><img vspace="5" hspace="5" src="Assign1_03.png" alt=""> <h2 id="5">Part D</h2><pre class="codeinput"><span class="comment">% Compute mean square error</span>
+errN = nanmean((X-Xnear).^2) <span class="comment">%nearest</span>
+errL = nanmean((X-Xlin).^2) <span class="comment">%linear</span>
+errS = nanmean((X-Xspline).^2) <span class="comment">%spline</span>
+
+<span class="comment">%calculate power in signal</span>
+<span class="comment">%amplitude was 1</span>
+p = 1/sqrt(2);
+dBN = 10*log10(errN/p)
+dBL = 10*log10(errL/p)
+dBS = 10*log10(errS/p)
+</pre><pre class="codeoutput">
+errN =
+
+    0.0028
+
+
+errL =
+
+   4.9691e-06
+
+
+errS =
+
+   4.1939e-08
+
+
+dBN =
+
+  -23.9647
+
+
+dBL =
+
+  -51.5321
+
+
+dBS =
+
+  -72.2686
+
+</pre><h2 id="6">5a Ex:6.1(page 62 USERGUIDE)</h2><pre class="codeinput"><span class="comment">% Example of use of the new Field II program running under Matlab</span>
+<span class="comment">% This example shows how a phased array B-mode system scans an image</span>
+<span class="comment">% This script assumes that the field_init procedure has been called</span>
+<span class="comment">% Example by Joergen Arendt Jensen, Nov. 28, 1995.</span>
+
+<span class="comment">% Generate the transducer apertures for send and receive</span>
+f0=3e6; <span class="comment">% Transducer center frequency [Hz]</span>
+fs=100e6; <span class="comment">% Sampling frequency [Hz]</span>
+c=1540; <span class="comment">% Speed of sound [m/s]</span>
+lambda=c/f0; <span class="comment">% Wavelength</span>
+element_height=5/1000; <span class="comment">% Height of element [m]</span>
+kerf=0.1/1000; <span class="comment">% Kerf [m]</span>
+focus=[0 0 70]/1000; <span class="comment">% Fixed focal point [m]</span>
+
+<span class="comment">% Generate aperture for emission</span>
+emit_aperture = xdc_linear_array (128, lambda/2, element_height, kerf, 1, 1,focus);
+
+<span class="comment">% Set the impulse response and excitation of the emit aperture</span>
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+
+<span class="comment">% Generate aperture for reception</span>
+receive_aperture = xdc_linear_array (128, lambda/2, element_height, kerf, 1, 1,focus);
+
+<span class="comment">% Set the impulse response for the receive aperture</span>
+xdc_impulse (receive_aperture, impulse_response);
+
+<span class="comment">% Do phased array imaging</span>
+point_position=[0 0 70]/1000; <span class="comment">% Position of the point to be imaged</span>
+no_lines=50; <span class="comment">% Number of A-lines in image</span>
+sector=20 * pi/180; <span class="comment">% Size of image sector</span>
+d_theta=sector/no_lines; <span class="comment">% Increment in angle for 90 deg. image</span>
+
+<span class="comment">% Pre-allocate some storage</span>
+image_data=zeros(800,no_lines);
+theta= -sector/2;
+
+<span class="keyword">for</span> i=1:no_lines
+    <span class="comment">% Set the focus for this direction</span>
+    xdc_focus (emit_aperture, 0, [70*sin(theta) 0 70*cos(theta)]/1000);
+    xdc_focus (receive_aperture, 0, [70*sin(theta) 0 70*cos(theta)]/1000);
+    <span class="comment">% Calculate the received response</span>
+    [v, t1]=calc_scat(emit_aperture, receive_aperture, point_position, 1);
+    <span class="comment">% Store the result</span>
+    image_data(1:max(size(v)),i)=v';
+    times(i) = t1;
+    <span class="comment">% Steer in another angle</span>
+    theta = theta + d_theta;
+<span class="keyword">end</span>
+<span class="comment">% Here the display of the data is inserted</span>
+plot(image_data)
+</pre><img vspace="5" hspace="5" src="Assign1_04.png" alt=""> <h2 id="7">5b Ex:6.2</h2><pre class="codeinput"><span class="comment">% Example of use of the new Field II program running under Matlab</span>
+<span class="comment">% This example shows how a linear array B-mode system scans an image</span>
+<span class="comment">% This script assumes that the field_init procedure has been called</span>
+<span class="comment">% Example by Joergen Arendt Jensen, Version 2.0, March 22, 2011.</span>
+<span class="comment">% Generate the transducer apertures for send and receive</span>
+
+f0=3e6; <span class="comment">% Transducer center frequency [Hz]</span>
+fs=100e6; <span class="comment">% Sampling frequency [Hz]</span>
+c=1540; <span class="comment">% Speed of sound [m/s]</span>
+lambda=c/f0; <span class="comment">% Wave length [m]</span>
+width=lambda; <span class="comment">% Width of element</span>
+element_height=5/1000; <span class="comment">% Height of element [m]</span>
+kerf=width/20; <span class="comment">% Kerf [m]</span>
+focus=[0 0 50]/1000; <span class="comment">% Fixed focal point [m]</span>
+N_elements=192; <span class="comment">% Number of elements in the transducer</span>
+N_active=64; <span class="comment">% Active elements in the transducer</span>
+<span class="comment">% Set the sampling frequency</span>
+set_sampling(fs);
+<span class="comment">% Generate aperture for emission</span>
+emit_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 5, focus);
+<span class="comment">% Set the impulse response and excitation of the emit aperture</span>
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+<span class="comment">% Generate aperture for reception</span>
+receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 5, focus);
+<span class="comment">% Set the impulse response for the receive aperture</span>
+xdc_impulse (receive_aperture, impulse_response);
+<span class="comment">% Load the computer phantom</span>
+[phantom_positions, phantom_amplitudes] = cyst_phantom(10000);
+<span class="comment">% Do linear array imaging</span>
+no_lines=N_elements-N_active+1; <span class="comment">% Number of A-lines in image</span>
+dx=width; <span class="comment">% Increment for image</span>
+z_focus=50/1000;
+<span class="comment">% Pre-allocate some storage</span>
+image_data=zeros(1,no_lines);
+<span class="keyword">for</span> i=1:no_lines
+    <span class="comment">% Find position for imaging</span>
+    x=(i-1-no_lines/2)*dx;
+    <span class="comment">% Set the focus for this direction</span>
+    xdc_center_focus (emit_aperture, [x 0 0]);
+    xdc_focus (emit_aperture, 0, [x 0 z_focus]);
+    xdc_center_focus (receive_aperture, [x 0 0]);
+    xdc_focus (receive_aperture, 0, [x 0 z_focus]);
+    <span class="comment">% Set the active elements using the apodization</span>
+    apo=[zeros(1, i-1) hamming(N_active)' zeros(1, N_elements-N_active-i+1)];
+    xdc_apodization (emit_aperture, 0, apo);
+    xdc_apodization (receive_aperture, 0, apo);
+    <span class="comment">% Calculate the received response</span>
+    [v, t1]=calc_scat(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
+    <span class="comment">% Store the result</span>
+    image_data(1:max(size(v)),i)=v;
+    times(i) = t1;
+<span class="keyword">end</span>
+<span class="comment">% Free space for apertures</span>
+xdc_free (emit_aperture)
+xdc_free (receive_aperture)
+<span class="comment">% Adjust the data in time and display it as</span>
+<span class="comment">% a gray scale image</span>
+min_sample=min(times)*fs;
+<span class="keyword">for</span> i=1:no_lines
+    rf_env=abs(hilbert([zeros(round(times(i)*fs-min_sample),1); image_data(:,i)]));
+    env(1:size(rf_env,1),i)=rf_env;
+<span class="keyword">end</span>
+
+<span class="comment">% make logarithmic compression to a 60 dB dynamic range</span>
+<span class="comment">% with proper units on the axis</span>
+env_dB=20*log10(env);
+env_dB=env_dB-max(max(env_dB));
+env_gray=127*(env_dB+60)/60;
+depth=((0:size(env,1)-1)+min_sample)/fs*c/2;
+x=((1:no_lines)-no_lines/2)*dx;
+image(x*1000, depth*1000, env_gray)
+xlabel(<span class="string">'Lateral distance [mm]'</span>)
+ylabel(<span class="string">'Depth [mm]'</span>)
+axis(<span class="string">'image'</span>)
+colormap(gray(128))
+title(<span class="string">'Image of cyst phantom (60 dB dynamic range)'</span>)
+                     
+<img vspace="5" hspace="5" src="Assign1_05.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Assignment 1 Problem 4 & 5
+% Tom Manuel
+
+%% Part A
+f0 = 1E6;
+fs = 40E6;
+c=1540;
+
+%create time
+%first figure out how many points to use in time as to cover
+%exactly 3 cycles
+ncyc = 3;
+T = 1/f0;
+npts = ncyc*T*fs; %number of points
+t = linspace(0,T*3,npts);
+
+%point along x axis (m)
+x = 2E-6;
+
+%get wavenumber (k)
+%k = 2pi /lamda
+k = 2 * pi / (c/f0 );
+
+%create sinusoid
+% A*sin(wt+kx)
+X = 1*sin(2*pi*f0*t+ k*x);
+close all
+plot(t,X)
+xlabel('time (s)')
+ylabel('amplitude')
+
+%% Part B
+
+%sig from Part A
+X = 1*sin(2*pi*f0*t+ k*x);
+
+% create same signal shifted Pi/8
+phase = pi/8;
+X2 = 1*sin(2*pi*f0*t+ k*x + phase);
+close all
+plot(t,X,t,X2)
+legend('X','X shifted')
+xlabel('time (s)')
+ylabel('amplitude')
+
+%% Part C
+
+% get the time value corresponded to a phase shift of pi/8
+% 2pi = 1/f0, 2pi/pi/8= 16, shift = (1/f0)/16
+shift = -(1/f0)/16;
+
+Xnear = interp1(t,X2,t+shift,'nearest');
+Xlin = interp1(t,X2,t+shift,'linear');
+Xspline = interp1(t,X2,t+shift,'spline');
+close all
+plot(t,X,t,X2,t,Xnear,t,Xlin,t,Xspline)
+legend('X','X2','Nearest','Linear','Spline')
+xlim([2E-6 2.5E-6])
+xlabel('time (s)')
+ylabel('amplitude')
+
+%% Part D
+
+% Compute mean square error 
+errN = nanmean((X-Xnear).^2) %nearest
+errL = nanmean((X-Xlin).^2) %linear
+errS = nanmean((X-Xspline).^2) %spline
+
+%calculate power in signal
+%amplitude was 1
+p = 1/sqrt(2);
+dBN = 10*log10(errN/p)
+dBL = 10*log10(errL/p)
+dBS = 10*log10(errS/p)
+
+%% 5a Ex:6.1(page 62 USERGUIDE)
+
+% Example of use of the new Field II program running under Matlab
+% This example shows how a phased array B-mode system scans an image
+% This script assumes that the field_init procedure has been called
+% Example by Joergen Arendt Jensen, Nov. 28, 1995.
+
+% Generate the transducer apertures for send and receive
+f0=3e6; % Transducer center frequency [Hz]
+fs=100e6; % Sampling frequency [Hz]
+c=1540; % Speed of sound [m/s]
+lambda=c/f0; % Wavelength
+element_height=5/1000; % Height of element [m]
+kerf=0.1/1000; % Kerf [m]
+focus=[0 0 70]/1000; % Fixed focal point [m]
+
+% Generate aperture for emission
+emit_aperture = xdc_linear_array (128, lambda/2, element_height, kerf, 1, 1,focus);
+
+% Set the impulse response and excitation of the emit aperture
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+
+% Generate aperture for reception
+receive_aperture = xdc_linear_array (128, lambda/2, element_height, kerf, 1, 1,focus);
+
+% Set the impulse response for the receive aperture
+xdc_impulse (receive_aperture, impulse_response);
+
+% Do phased array imaging
+point_position=[0 0 70]/1000; % Position of the point to be imaged
+no_lines=50; % Number of A-lines in image
+sector=20 * pi/180; % Size of image sector
+d_theta=sector/no_lines; % Increment in angle for 90 deg. image
+
+% Pre-allocate some storage
+image_data=zeros(800,no_lines);
+theta= -sector/2;
+
+for i=1:no_lines
+    % Set the focus for this direction
+    xdc_focus (emit_aperture, 0, [70*sin(theta) 0 70*cos(theta)]/1000);
+    xdc_focus (receive_aperture, 0, [70*sin(theta) 0 70*cos(theta)]/1000);
+    % Calculate the received response
+    [v, t1]=calc_scat(emit_aperture, receive_aperture, point_position, 1);
+    % Store the result
+    image_data(1:max(size(v)),i)=v';
+    times(i) = t1;
+    % Steer in another angle
+    theta = theta + d_theta;
+end
+% Here the display of the data is inserted
+plot(image_data)
+
+%% 5b Ex:6.2
+
+% Example of use of the new Field II program running under Matlab
+% This example shows how a linear array B-mode system scans an image
+% This script assumes that the field_init procedure has been called
+% Example by Joergen Arendt Jensen, Version 2.0, March 22, 2011.
+% Generate the transducer apertures for send and receive
+
+f0=3e6; % Transducer center frequency [Hz]
+fs=100e6; % Sampling frequency [Hz]
+c=1540; % Speed of sound [m/s]
+lambda=c/f0; % Wave length [m]
+width=lambda; % Width of element
+element_height=5/1000; % Height of element [m]
+kerf=width/20; % Kerf [m]
+focus=[0 0 50]/1000; % Fixed focal point [m]
+N_elements=192; % Number of elements in the transducer
+N_active=64; % Active elements in the transducer
+% Set the sampling frequency
+set_sampling(fs);
+% Generate aperture for emission
+emit_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 5, focus);
+% Set the impulse response and excitation of the emit aperture
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+% Generate aperture for reception
+receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 5, focus);
+% Set the impulse response for the receive aperture
+xdc_impulse (receive_aperture, impulse_response);
+% Load the computer phantom
+[phantom_positions, phantom_amplitudes] = cyst_phantom(10000);
+% Do linear array imaging
+no_lines=N_elements-N_active+1; % Number of A-lines in image
+dx=width; % Increment for image
+z_focus=50/1000;
+% Pre-allocate some storage
+image_data=zeros(1,no_lines);
+for i=1:no_lines
+    % Find position for imaging
+    x=(i-1-no_lines/2)*dx;
+    % Set the focus for this direction
+    xdc_center_focus (emit_aperture, [x 0 0]);
+    xdc_focus (emit_aperture, 0, [x 0 z_focus]);
+    xdc_center_focus (receive_aperture, [x 0 0]);
+    xdc_focus (receive_aperture, 0, [x 0 z_focus]);
+    % Set the active elements using the apodization
+    apo=[zeros(1, i-1) hamming(N_active)' zeros(1, N_elements-N_active-i+1)];
+    xdc_apodization (emit_aperture, 0, apo);
+    xdc_apodization (receive_aperture, 0, apo);
+    % Calculate the received response
+    [v, t1]=calc_scat(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
+    % Store the result
+    image_data(1:max(size(v)),i)=v;
+    times(i) = t1;
+end
+% Free space for apertures
+xdc_free (emit_aperture)
+xdc_free (receive_aperture)
+% Adjust the data in time and display it as
+% a gray scale image
+min_sample=min(times)*fs;
+for i=1:no_lines
+    rf_env=abs(hilbert([zeros(round(times(i)*fs-min_sample),1); image_data(:,i)]));
+    env(1:size(rf_env,1),i)=rf_env;
+end
+
+% make logarithmic compression to a 60 dB dynamic range
+% with proper units on the axis
+env_dB=20*log10(env);
+env_dB=env_dB-max(max(env_dB));
+env_gray=127*(env_dB+60)/60;
+depth=((0:size(env,1)-1)+min_sample)/fs*c/2;
+x=((1:no_lines)-no_lines/2)*dx;
+image(x*1000, depth*1000, env_gray)
+xlabel('Lateral distance [mm]')
+ylabel('Depth [mm]')
+axis('image')
+colormap(gray(128))
+title('Image of cyst phantom (60 dB dynamic range)')
+
+##### SOURCE END #####
+--></body></html>
