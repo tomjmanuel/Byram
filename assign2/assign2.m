@@ -96,6 +96,7 @@ colormap('gray')
 title('Delayed and Summed')
 xlabel('Xe (mm)')
 ylabel('Depth (mm)')
+axis image
 
 
 %% Still Part 4
@@ -301,7 +302,7 @@ axis image
 close all
 clear all
 
-pff = 4; % parallel focus factor (2,4,8,16)
+pff = 16; % parallel focus factor (2,4,8,16)
 
 load('pointTargetData.mat')
 data = veraStrct.data;
@@ -384,7 +385,39 @@ xlabel('Xe (mm)')
 ylabel('Depth (mm)')
 axis image
 
+%% display 4 images with different pff
+figure
+subplot(1,4,1)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,1),[10 100])
+colormap('gray')
+title('2 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
 
+subplot(1,4,2)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,2),[10 100])
+colormap('gray')
+title('4 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+subplot(1,4,3)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,3),[10 100])
+colormap('gray')
+title('8 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+subplot(1,4,4)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,4),[10 100])
+colormap('gray')
+title('16 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
 
 
 
