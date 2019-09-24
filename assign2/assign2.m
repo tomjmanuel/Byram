@@ -189,6 +189,10 @@ dx = 1E-3*veraStrct.XMTspacingMM;
 %get Nx,dx,Nz, and dz
 foo = size(data);
 Nz = foo(1);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
 % woah do you have to guess c to get dz??
 % dz = [m/s]*[s/sample] = c * fs^-1 
 c = 1500; %m/s
@@ -249,6 +253,11 @@ dx = 1E-3*veraStrct.XMTspacingMM;
 %get Nx,dx,Nz, and dz
 foo = size(data);
 Nz = foo(1);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+
 % woah do you have to guess c to get dz??
 % dz = [m/s]*[s/sample] = c * fs^-1 
 c = 1500; %m/s
@@ -294,19 +303,16 @@ xlabel('Xe (mm)')
 ylabel('Depth (mm)')
 axis image
 
-
 %% Part 6 Parallel imaging
 % adapted from dynamic focus code... as if that weren't complicated enough
 % each foci will have a slightly different delay profile
 % so calculate a Trx for each
 close all
 clear all
+load('pointTargetData.mat')
 
 pff = 16; % parallel focus factor (2,4,8,16)
-
-load('pointTargetData.mat')
 data = veraStrct.data;
-
 %First I will create a grid that represents the x and z coordinates of each
 %pixel in physical space
 Nx = veraStrct.numElementsPerXmt;
@@ -315,6 +321,10 @@ dx = 1E-3*veraStrct.XMTspacingMM;
 %get Nx,dx,Nz, and dz
 foo = size(data);
 Nz = foo(1);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
 % woah do you have to guess c to get dz??
 % dz = [m/s]*[s/sample] = c * fs^-1 
 c = 1500; %m/s
@@ -325,7 +335,7 @@ Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
 Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
 
 % create lateral foci vector
-Xf = linspace(-dx,dx,pff);
+Xf = linspace(-dx*pff/2,dx*pff/2,pff);
 
 Trx = zeros([Nz,Nx,pff]);
 % calculate delay for each focus
@@ -354,23 +364,23 @@ datad = zeros([Nz Nx bar pff]); %[Nz Nx nBeams/pff pff]
 
 %
 bar = nBeams/pff;
-for i=1:nBeams/pff
+for i=1:nBeams
     for j=1:pff
         datad(:,i,:,j) = interp1(t,datar(:,i,:),t+squeeze(Trx(:,i,j))','linear');
+        %datad(:,i,:,j) = datar(:,i,:);
     end
 end
 
-%
-% now reshape data becuase my parallel beams are in the 4th dimension
-dataF = zeros(foo);%original data size
+datas = squeeze(sum(datad,2));
+
+foo = size(data);
+imf = zeros([foo(1) foo(3)]);%original data size without element dimension
 for i=1:bar
     for j=1:pff
-        dataF(:,:,i*pff -pff+j) = datad(:,:,i,j);
+        imf(:,i*pff -pff+j) = datas(:,i,j);
     end
 end
 
-% sum
-imf = squeeze(sum(dataF(:,:,:,1),2)); %sum
 imf(isnan(imf))=-1000; %interp1 drops some Nans in here
 % compress
 imf = 20.*log10(abs(hilbert(imf)));
@@ -386,6 +396,7 @@ ylabel('Depth (mm)')
 axis image
 
 %% display 4 images with different pff
+%pIms = zeros([2353,128,4]);
 figure
 subplot(1,4,1)
 imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,1),[10 100])
@@ -419,6 +430,7 @@ xlabel('Xe (mm)')
 ylabel('Depth (mm)')
 axis image
 
+%% Part 7 Apodization
 
 
 
