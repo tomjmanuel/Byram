@@ -20,7 +20,7 @@ data = data(t0+1:end,:,:);
 foo = size(data);
 % woah do you have to guess c to get dz in [m]??
 % dz = [m/s]*[s/sample] = c * fs^-1 
-c = 1500; %m/s
+c = 1540; %m/s
 dz = .5 * c / 20E6;
 
 % build coordinate matrices
@@ -118,7 +118,7 @@ data = data(t0+1:end,:,:);
 foo = size(data);
 % woah do you have to guess c to get dz??
 % dz = [m/s]*[s/sample] = c * fs^-1 
-c = 1500; %m/s
+c = 1540; %m/s
 dz = .5 * c / 20E6;
 
 % build coordinate matrices
@@ -195,7 +195,7 @@ data = data(t0+1:end,:,:);
 foo = size(data);
 % woah do you have to guess c to get dz??
 % dz = [m/s]*[s/sample] = c * fs^-1 
-c = 1500; %m/s
+c = 1540; %m/s
 dz = .5 * c / 20E6;
 
 % build coordinate matrices
@@ -260,7 +260,7 @@ foo = size(data);
 
 % woah do you have to guess c to get dz??
 % dz = [m/s]*[s/sample] = c * fs^-1 
-c = 1500; %m/s
+c = 1540; %m/s
 dz = .5 * c / 20E6;
 
 % build coordinate matrices
@@ -327,7 +327,7 @@ data = data(t0+1:end,:,:);
 foo = size(data);
 % woah do you have to guess c to get dz??
 % dz = [m/s]*[s/sample] = c * fs^-1 
-c = 1500; %m/s
+c = 1540; %m/s
 dz = .5 * c / 20E6;
 
 % build coordinate matrices
