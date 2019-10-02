@@ -7,11 +7,12 @@
 
 %  The different focal zones for reception and emission
 
-focal_transmit=[10 20 40 80]'/1000;
+focal_transmit=[10:10:80]'/1000;
 Nft=max(size(focal_transmit));
-focus_times_transmit=([0 15 30 60]'/1000)/1540;
+%focus_times_transmit=([0 15 30 60]'/1000)/1540;
+focus_times_transmit=focal_transmit/1540;
 
-focal_receive=[10:2:150]'/1000;
+focal_receive=[10:10:80]'/1000;
 Nfr=max(size(focal_receive));
 focus_times_receive=(focal_receive-1/1000)/1540;
 
@@ -27,8 +28,8 @@ for i=1:no_lines
 
    %  Calculate the apodization 
    
-  xdc_apodization (emit_aperture, 0, hamming(N_elements)');
-  xdc_apodization (receive_aperture, 0, hamming(N_elements)');
+  xdc_apodization (emit_aperture, 0, ones([N_elements 1])');
+  xdc_apodization (receive_aperture, 0, ones([N_elements 1])');
 
   %   Calculate the received response
 

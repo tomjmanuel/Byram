@@ -48,21 +48,47 @@ receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1,
 xdc_impulse (receive_aperture, impulse_response);
 
 %   Load the computer phantom
-
 [phantom_positions, phantom_amplitudes] = cyst_phantom(10000);
 
 %   Do linear array imaging
 
 no_lines=20;                         %  Number of lines in image
-image_width=20/1000;                 %  Size of image sector
+image_width=no_lines/1000;                 %  Size of image sector
 d_x=image_width/no_lines;            %  Increment for image
 
 %  Use 128 elements with 2 mm between receive focuses
-figure
+
 mecr128a
 %%
-mk_img
-title('Hamming')
+
+mk_img_tom
+subplot(1,3,1)
+imagesc(xx,zz(100:250),new_env(100:250,:),[-50 0])
+axis image
+colormap(gray)
+title('Ones')
+
+%%
+mk_img_tom_forCNR
+
+%% create a struct that saves means and stds for diff windows
+% all the prep done in command line
+win_results.uhamClut = uhamClut;
+win_results.uhamCyst = uhamCyst;
+win_results.stdhamClut = stdhamNCyst;
+win_results.stdhamCyst = stdhamCyst;
+win_results.uhanClut = uhanClut;
+win_results.uhamCyst = uhanCyst;
+win_results.stdhanClut = stdhanClut;
+win_results.stdhanCyst = stdhanCyst;
+win_results.uoneCyst = uonecyst;
+win_results.uonenoise = uonenoise;
+win_results.stdonecyst = stdonecyst;
+win_results.stdonenoise = stdonenoise;
+
+save('windowing_results.mat','win_results');
+
+
 
 
 %%
@@ -81,44 +107,6 @@ cyst_mask = roipoly();
 noise_mask = roipoly();
 
 
-%% get contrast
-% using: C = (Sa -Sb) / (Sa+Sb)
-temp1 = hann.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = hann.*cyst_mask;
-temp2(isnan(temp2))=0;
-Chann = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-%% get contrast
-% using: C = (Sa -Sb) / (Sa+Sb)
-temp1 = hamm.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = hamm.*cyst_mask;
-temp2(isnan(temp2))=0;
-Chamm = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-
-%% get contrast
-% using: C = (Sa -Sb) / (Sa+Sb)
-temp1 = uno.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = uno.*cyst_mask;
-temp2(isnan(temp2))=0;
-Cno_apo = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-%% 3 Contrasts are
-% no apodization: .2602
-% hanning: .3798
-% hamming .4874
-
-%% get noise from figs
-im = fig.Children(1).Children.CData;
-noise_mask = roipoly;
-temp1 = im(noise_mask);
-noiseham = std(temp1);
-
-%% Contrast to noise ratios
-% I used roipoly to get noise for each
-CNR_noapo = Cno_apo/noisena;  % 0.0163
-CNR_hann = Chann/noisehan;    % 0.0086
-CNR_hamm = Chamm/noiseham;    % 0.0139
 
 
 %% Part 8 Constant F#
