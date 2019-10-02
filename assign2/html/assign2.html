@@ -1,0 +1,921 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>assign2</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-27"><meta name="DC.source" content="assign2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#1">Assignment 2 Tom Manuel</a></li><li><a href="#3">Still Part 4</a></li><li><a href="#4">Part 5, Continuous delay and sum</a></li><li><a href="#5">Part 5b, Continuous delay and sum (cyst data)</a></li><li><a href="#6">Part 6 Parallel imaging</a></li><li><a href="#7">display 4 images with different pff</a></li><li><a href="#8">Part 7 Apodization</a></li></ul></div><h2 id="1">Assignment 2 Tom Manuel</h2><p>Part 4</p><pre class="codeinput">close <span class="string">all</span>
+clear <span class="string">all</span>
+load(<span class="string">'pointTargetData.mat'</span>)
+data = veraStrct.data;
+<span class="comment">%imagesc(data(:,:,64),[-100 100])</span>
+
+<span class="comment">% Part 4: single fixed focus beamforming</span>
+<span class="comment">%pixel in physical space</span>
+close <span class="string">all</span>
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3 * veraStrct.XMTspacingMM;
+
+<span class="comment">%get Nx,dx,Nz, and dz</span>
+foo = size(data);
+t0 = veraStrct.timeZero -1; <span class="comment">% nPts to throw away</span>
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+<span class="comment">% woah do you have to guess c to get dz in [m]??</span>
+<span class="comment">% dz = [m/s]*[s/sample] = c * fs^-1</span>
+c = 1540; <span class="comment">%m/s</span>
+dz = .5 * c / 20E6;
+
+<span class="comment">% build coordinate matrices</span>
+Xe = dx.*linspace(-Nx/2,Nx/2,Nx);
+Ze = 0;
+<span class="comment">% set focus (in meters)</span>
+xf = 0;
+zf = .04; <span class="comment">%4 cm focal depth</span>
+
+<span class="comment">% calculate delay</span>
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze-zf).^2) + zf/c; <span class="comment">%[s]</span>
+<span class="comment">% subtract max</span>
+Trx = Trx - min(Trx); <span class="comment">%[s] add 1 to take away that pesky zero</span>
+<span class="comment">% since shifting discretely, upsample data</span>
+usf = 8;
+z1 = linspace(1,foo(1),foo(1));
+z2 = linspace(1,foo(1),foo(1)*usf);
+datau = interp1(z1,data,z2,<span class="string">'linear'</span>); <span class="comment">%upsampled data</span>
+
+<span class="comment">%convert Trx from [s] to samples</span>
+<span class="comment">%trx = trx [s] * fs [sam/s] *usf [sam/sam]</span>
+<span class="comment">%round to descritize</span>
+fs = veraStrct.samplingRateMHz * 1E6;
+Trx = round(Trx.*fs.*usf) +1; <span class="comment">%add 1 to get rid of pesky zero</span>
+<span class="comment">%</span>
+<span class="comment">% apply the delay to a single image</span>
+im0 = datau(:,:,64); <span class="comment">% original data for one frame</span>
+imd = zeros(size(im0)); <span class="comment">% delayed frame</span>
+<span class="keyword">for</span> i=1:128
+    imd(1:end-Trx(i)+1,i) = im0(Trx(i):end,i);
+<span class="keyword">end</span>
+
+<span class="comment">% apply the delay to all frames</span>
+<span class="comment">%exploit the fact that for all beams, the distribution of delay is the same</span>
+datad = zeros(size(datau)); <span class="comment">%data delayed</span>
+<span class="keyword">for</span> i=1:128
+    <span class="comment">%datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(i),'linear');</span>
+    datad(1:end-Trx(i)+1,i,:) = datau(Trx(i):end,i,:);
+<span class="keyword">end</span>
+
+
+Zvec = dz.*linspace(0,Nz-1,Nz.*usf); <span class="comment">% z axis for plotting time</span>
+<span class="comment">% sum</span>
+imf = squeeze(sum(datad,2));
+imf(isnan(imf))=-100;
+<span class="comment">% compress</span>
+imf = 20.*log10(abs(hilbert(imf)));
+
+<span class="comment">% Part 4 deliverables Point target</span>
+<span class="comment">% image of original channel data</span>
+<span class="comment">% make vector representing depth</span>
+</pre><pre class="codeinput">figure
+subplot(1,3,1)
+imagesc(im0(900*usf:1100*usf,:),[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'Original channel data'</span>)
+xlabel(<span class="string">'Xe (px)'</span>)
+ylabel(<span class="string">'Depth (px)'</span>)
+
+<span class="comment">% image of delayed channel data</span>
+subplot(1,3,2)
+imagesc(imd(900*usf:1100*usf,:),[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'Delayed channel data'</span>)
+xlabel(<span class="string">'Xe (px)'</span>)
+ylabel(<span class="string">'Depth (px)'</span>)
+
+<span class="comment">% image of delayed and summed data</span>
+subplot(1,3,3)
+imagesc(Xe.*1000,Zvec.*1000,imf,[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'Delayed and Summed'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+</pre><h2 id="3">Still Part 4</h2><p>Repeat all steps but for cyst</p><pre class="codeinput">close <span class="string">all</span>
+clear <span class="string">all</span>
+load(<span class="string">'anecoicCystData.mat'</span>)
+data = veraStrct.data;
+
+close <span class="string">all</span>
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3 * veraStrct.XMTspacingMM;
+
+<span class="comment">%get Nx,dx,Nz, and dz</span>
+foo = size(data);
+t0 = veraStrct.timeZero -1; <span class="comment">% nPts to throw away</span>
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+<span class="comment">% woah do you have to guess c to get dz??</span>
+<span class="comment">% dz = [m/s]*[s/sample] = c * fs^-1</span>
+c = 1540; <span class="comment">%m/s</span>
+dz = .5 * c / 20E6;
+
+<span class="comment">% build coordinate matrices</span>
+Xe = dx.*linspace(-Nx/2,Nx/2,Nx);
+Ze = 0;
+<span class="comment">% set focus (in meters)</span>
+xf = 0;
+zf = .04; <span class="comment">%4 cm focal depth</span>
+
+<span class="comment">% calculate delay</span>
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze-zf).^2) + zf/c; <span class="comment">%[s]</span>
+<span class="comment">% subtract max</span>
+Trx = Trx - min(Trx); <span class="comment">%[s] add 1 to take away that pesky zero</span>
+<span class="comment">% since shifting discretely, upsample data</span>
+usf = 10;
+z1 = linspace(1,foo(1),foo(1));
+z2 = linspace(1,foo(1),foo(1)*usf);
+datau = interp1(z1,data,z2,<span class="string">'linear'</span>); <span class="comment">%upsampled data</span>
+
+<span class="comment">%convert Trx from [s] to samples</span>
+<span class="comment">%trx = trx [s] * fs [sam/s] *usf [sam/sam]</span>
+<span class="comment">%round to descritize</span>
+fs = veraStrct.samplingRateMHz * 1E6;
+Trx = round(Trx.*fs.*usf) +1; <span class="comment">%add 1 to get rid of pesky zero</span>
+
+<span class="comment">% apply the delay to all frames</span>
+<span class="comment">%exploit the fact that for all beams, the distribution of delay is the same</span>
+datad = zeros(size(datau)); <span class="comment">%data delayed</span>
+<span class="keyword">for</span> i=1:128
+    <span class="comment">%datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(i),'linear');</span>
+    datad(1:end-Trx(i)+1,i,:) = datau(Trx(i):end,i,:);
+<span class="keyword">end</span>
+
+Zvec = dz.*linspace(0,Nz-1,Nz.*usf); <span class="comment">% z axis for plotting time</span>
+<span class="comment">% sum</span>
+imf = squeeze(sum(datad,2));
+imf(isnan(imf))=-100;
+<span class="comment">% compress</span>
+imf = 20.*log10(abs(hilbert(imf)));
+
+<span class="comment">% Part 4 deliverables Cyst</span>
+<span class="comment">% image of original channel data</span>
+<span class="comment">% make vector representing depth</span>
+
+figure
+<span class="comment">% image of delayed and summed data</span>
+Zvec = dz.*linspace(0,Nz-1,Nz); <span class="comment">% z axis for plotting time</span>
+imagesc(Xe.*1000,Zvec.*1000,imf,[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'Delayed and summed'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+</pre><h2 id="4">Part 5, Continuous delay and sum</h2><pre class="codeinput">close <span class="string">all</span>
+clear <span class="string">all</span>
+load(<span class="string">'pointTargetData.mat'</span>)
+data = veraStrct.data;
+<span class="comment">%imagesc(data(:,:,64),[-100 100])</span>
+
+<span class="comment">%First I will create a grid that represents the x and z coordinates of each</span>
+<span class="comment">%pixel in physical space</span>
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+<span class="comment">%get Nx,dx,Nz, and dz</span>
+foo = size(data);
+Nz = foo(1);
+t0 = veraStrct.timeZero -1; <span class="comment">% nPts to throw away</span>
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+<span class="comment">% woah do you have to guess c to get dz??</span>
+<span class="comment">% dz = [m/s]*[s/sample] = c * fs^-1</span>
+c = 1540; <span class="comment">%m/s</span>
+dz = .5 * c / 20E6;
+
+<span class="comment">% build coordinate matrices</span>
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+<span class="comment">% set focus (in meters)</span>
+xf = 0;
+
+<span class="comment">% create a time vector</span>
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+<span class="comment">% calculate delay</span>
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze).^2) + Ze/c; <span class="comment">%[s]</span>
+<span class="comment">%Trx = Trx - min(Trx(:));</span>
+Trx = Trx - repmat(min(Trx,[],2),[1 Nx]);
+<span class="comment">%</span>
+h=waitbar(0,<span class="string">'processing'</span>);
+datad = zeros(size(data)); <span class="comment">%delayed data</span>
+<span class="keyword">for</span> i=1:128
+    datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(:,i)',<span class="string">'linear'</span>);
+    waitbar(i/128,h);
+<span class="keyword">end</span>
+close(h);
+
+<span class="comment">% sum</span>
+imf = squeeze(sum(datad,2)); <span class="comment">%sum</span>
+imf(isnan(imf))=-1000; <span class="comment">%interp1 drops some Nans in here</span>
+<span class="comment">% compress</span>
+imf = 20.*log10(abs(hilbert(imf)));
+
+<span class="comment">% image of delayed and summed data</span>
+Zvec = dz.*linspace(0,Nz-1,Nz); <span class="comment">% z axis for plotting time</span>
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'Dynamically focused'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+</pre><h2 id="5">Part 5b, Continuous delay and sum (cyst data)</h2><pre class="codeinput">close <span class="string">all</span>
+clear <span class="string">all</span>
+load(<span class="string">'anecoicCystData.mat'</span>)
+data = veraStrct.data;
+<span class="comment">%imagesc(data(:,:,64),[-100 100])</span>
+
+<span class="comment">%First I will create a grid that represents the x and z coordinates of each</span>
+<span class="comment">%pixel in physical space</span>
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+<span class="comment">%get Nx,dx,Nz, and dz</span>
+foo = size(data);
+Nz = foo(1);
+t0 = veraStrct.timeZero -1; <span class="comment">% nPts to throw away</span>
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+
+<span class="comment">% woah do you have to guess c to get dz??</span>
+<span class="comment">% dz = [m/s]*[s/sample] = c * fs^-1</span>
+c = 1540; <span class="comment">%m/s</span>
+dz = .5 * c / 20E6;
+
+<span class="comment">% build coordinate matrices</span>
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+<span class="comment">% set focus (in meters)</span>
+xf = 0;
+
+<span class="comment">% create a time vector</span>
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+<span class="comment">% calculate delay</span>
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze).^2) + Ze/c; <span class="comment">%[s]</span>
+<span class="comment">%Trx = Trx - min(Trx(:));</span>
+Trx = Trx - repmat(min(Trx,[],2),[1 Nx]);
+<span class="comment">%</span>
+h=waitbar(0,<span class="string">'processing'</span>);
+datad = zeros(size(data)); <span class="comment">%delayed data</span>
+<span class="keyword">for</span> i=1:128
+    datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(:,i)',<span class="string">'linear'</span>);
+    waitbar(i/128,h);
+<span class="keyword">end</span>
+close(h);
+
+<span class="comment">% sum</span>
+imf = squeeze(sum(datad,2)); <span class="comment">%sum</span>
+imf(isnan(imf))=-1000; <span class="comment">%interp1 drops some Nans in here</span>
+<span class="comment">% compress</span>
+imf = 20.*log10(abs(hilbert(imf)));
+
+<span class="comment">% image of delayed and summed data</span>
+Zvec = dz.*linspace(0,Nz-1,Nz); <span class="comment">% z axis for plotting time</span>
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'Dynamically focused'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+</pre><h2 id="6">Part 6 Parallel imaging</h2><p>adapted from dynamic focus code... as if that weren't complicated enough each foci will have a slightly different delay profile so calculate a Trx for each</p><pre class="codeinput">close <span class="string">all</span>
+<span class="comment">%clear all</span>
+<span class="comment">%load('pointTargetData.mat')</span>
+
+pff = 2; <span class="comment">% parallel focus factor (2,4,8,16)</span>
+data = veraStrct.data;
+<span class="comment">%First I will create a grid that represents the x and z coordinates of each</span>
+<span class="comment">%pixel in physical space</span>
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+<span class="comment">%get Nx,dx,Nz, and dz</span>
+foo = size(data);
+Nz = foo(1);
+t0 = veraStrct.timeZero -1; <span class="comment">% nPts to throw away</span>
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+<span class="comment">% woah do you have to guess c to get dz??</span>
+<span class="comment">% dz = [m/s]*[s/sample] = c * fs^-1</span>
+c = 1540; <span class="comment">%m/s</span>
+dz = .5 * c / 20E6;
+
+<span class="comment">% build coordinate matrices</span>
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+<span class="comment">% create lateral foci vector</span>
+Xf = linspace(-dx*pff/2,dx*pff/2,pff);
+
+Trx = zeros([Nz,Nx,pff]);
+<span class="comment">% calculate delay for each focus</span>
+<span class="keyword">for</span> i=1:pff
+    ttemp = (1/c)*sqrt((Xe-Xf(i)).^2 + (Ze).^2) + Ze/c; <span class="comment">%[s] temp delay matrix [Nz x Nx]</span>
+    <span class="comment">%Trx = Trx - min(Trx(:));</span>
+    Trx(:,:,i) = ttemp - repmat(min(ttemp,[],2),[1 Nx]);
+<span class="keyword">end</span>
+
+<span class="comment">% create a time vector</span>
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+<span class="comment">% takeaway beams to artificially simulate parallel foci</span>
+nBeams = foo(3);
+datar = zeros([Nz,Nx,nBeams/pff]); <span class="comment">%reduced data [Nz,Nx,nbeams/par_foc_factor]</span>
+f=1;
+<span class="keyword">for</span> i=1:pff:nBeams
+    datar(:,:,f)=data(:,:,i);
+    f=f+1;
+<span class="keyword">end</span>
+
+<span class="comment">%Now loop through datar and apply delays</span>
+bar = nBeams/pff;
+datad = zeros([Nz Nx bar pff]); <span class="comment">%[Nz Nx nBeams/pff pff]</span>
+
+<span class="comment">%</span>
+bar = nBeams/pff;
+<span class="keyword">for</span> i=1:nBeams
+    <span class="keyword">for</span> j=1:pff
+        datad(:,i,:,j) = interp1(t,datar(:,i,:),t+squeeze(Trx(:,i,j))',<span class="string">'linear'</span>);
+        <span class="comment">%datad(:,i,:,j) = datar(:,i,:);</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+datas = squeeze(sum(datad,2));
+
+foo = size(data);
+imf = zeros([foo(1) foo(3)]);<span class="comment">%original data size without element dimension</span>
+<span class="keyword">for</span> i=1:bar
+    <span class="keyword">for</span> j=1:pff
+        imf(:,i*pff -pff+j) = datas(:,i,j);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+imf(isnan(imf))=-1000; <span class="comment">%interp1 drops some Nans in here</span>
+<span class="comment">% compress</span>
+imf = 20.*log10(abs(hilbert(imf)));
+
+<span class="comment">% image of delayed and summed data</span>
+Zvec = dz.*linspace(0,Nz-1,Nz); <span class="comment">% z axis for plotting time</span>
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'Parallel Imaging'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+</pre><h2 id="7">display 4 images with different pff</h2><pre class="codeinput"><span class="comment">%pIms = zeros([2353,128,4]);</span>
+figure
+subplot(1,4,1)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,1),[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'2 parallel foci'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+
+subplot(1,4,2)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,2),[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'4 parallel foci'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+
+subplot(1,4,3)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,3),[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'8 parallel foci'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+
+subplot(1,4,4)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,4),[10 100])
+colormap(<span class="string">'gray'</span>)
+title(<span class="string">'16 parallel foci'</span>)
+xlabel(<span class="string">'Xe (mm)'</span>)
+ylabel(<span class="string">'Depth (mm)'</span>)
+axis <span class="string">image</span>
+</pre><h2 id="8">Part 7 Apodization</h2><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Assignment 2 Tom Manuel
+% Part 4
+close all
+clear all
+load('pointTargetData.mat')
+data = veraStrct.data;
+%imagesc(data(:,:,64),[-100 100])
+
+% Part 4: single fixed focus beamforming
+%pixel in physical space
+close all
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3 * veraStrct.XMTspacingMM;
+
+%get Nx,dx,Nz, and dz
+foo = size(data);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+% woah do you have to guess c to get dz in [m]??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1540; %m/s
+dz = .5 * c / 20E6;
+
+% build coordinate matrices
+Xe = dx.*linspace(-Nx/2,Nx/2,Nx);
+Ze = 0;
+% set focus (in meters)
+xf = 0;
+zf = .04; %4 cm focal depth
+
+% calculate delay
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze-zf).^2) + zf/c; %[s]
+% subtract max
+Trx = Trx - min(Trx); %[s] add 1 to take away that pesky zero
+% since shifting discretely, upsample data
+usf = 8;
+z1 = linspace(1,foo(1),foo(1));
+z2 = linspace(1,foo(1),foo(1)*usf);
+datau = interp1(z1,data,z2,'linear'); %upsampled data
+
+%convert Trx from [s] to samples
+%trx = trx [s] * fs [sam/s] *usf [sam/sam]
+%round to descritize
+fs = veraStrct.samplingRateMHz * 1E6;
+Trx = round(Trx.*fs.*usf) +1; %add 1 to get rid of pesky zero
+%
+% apply the delay to a single image
+im0 = datau(:,:,64); % original data for one frame
+imd = zeros(size(im0)); % delayed frame
+for i=1:128
+    imd(1:end-Trx(i)+1,i) = im0(Trx(i):end,i);
+end
+
+% apply the delay to all frames
+%exploit the fact that for all beams, the distribution of delay is the same
+datad = zeros(size(datau)); %data delayed
+for i=1:128
+    %datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(i),'linear');
+    datad(1:end-Trx(i)+1,i,:) = datau(Trx(i):end,i,:);
+end
+
+
+Zvec = dz.*linspace(0,Nz-1,Nz.*usf); % z axis for plotting time
+% sum
+imf = squeeze(sum(datad,2));
+imf(isnan(imf))=-100;
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% Part 4 deliverables Point target
+% image of original channel data
+% make vector representing depth
+%%
+figure
+subplot(1,3,1)
+imagesc(im0(900*usf:1100*usf,:),[10 100])
+colormap('gray')
+title('Original channel data')
+xlabel('Xe (px)')
+ylabel('Depth (px)')
+
+% image of delayed channel data
+subplot(1,3,2)
+imagesc(imd(900*usf:1100*usf,:),[10 100])
+colormap('gray')
+title('Delayed channel data')
+xlabel('Xe (px)')
+ylabel('Depth (px)')
+
+% image of delayed and summed data
+subplot(1,3,3)
+imagesc(Xe.*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Delayed and Summed')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+
+%% Still Part 4
+% Repeat all steps but for cyst
+close all
+clear all
+load('anecoicCystData.mat')
+data = veraStrct.data;
+
+close all
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3 * veraStrct.XMTspacingMM;
+
+%get Nx,dx,Nz, and dz
+foo = size(data);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+% woah do you have to guess c to get dz??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1540; %m/s
+dz = .5 * c / 20E6;
+
+% build coordinate matrices
+Xe = dx.*linspace(-Nx/2,Nx/2,Nx);
+Ze = 0;
+% set focus (in meters)
+xf = 0;
+zf = .04; %4 cm focal depth
+
+% calculate delay
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze-zf).^2) + zf/c; %[s]
+% subtract max
+Trx = Trx - min(Trx); %[s] add 1 to take away that pesky zero
+% since shifting discretely, upsample data
+usf = 10;
+z1 = linspace(1,foo(1),foo(1));
+z2 = linspace(1,foo(1),foo(1)*usf);
+datau = interp1(z1,data,z2,'linear'); %upsampled data
+
+%convert Trx from [s] to samples
+%trx = trx [s] * fs [sam/s] *usf [sam/sam]
+%round to descritize
+fs = veraStrct.samplingRateMHz * 1E6;
+Trx = round(Trx.*fs.*usf) +1; %add 1 to get rid of pesky zero
+
+% apply the delay to all frames
+%exploit the fact that for all beams, the distribution of delay is the same
+datad = zeros(size(datau)); %data delayed
+for i=1:128
+    %datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(i),'linear');
+    datad(1:end-Trx(i)+1,i,:) = datau(Trx(i):end,i,:);
+end
+
+Zvec = dz.*linspace(0,Nz-1,Nz.*usf); % z axis for plotting time
+% sum
+imf = squeeze(sum(datad,2));
+imf(isnan(imf))=-100;
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% Part 4 deliverables Cyst
+% image of original channel data
+% make vector representing depth
+
+figure
+% image of delayed and summed data
+Zvec = dz.*linspace(0,Nz-1,Nz); % z axis for plotting time
+imagesc(Xe.*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Delayed and summed')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+
+%% Part 5, Continuous delay and sum
+close all
+clear all
+load('pointTargetData.mat')
+data = veraStrct.data;
+%imagesc(data(:,:,64),[-100 100])
+
+%First I will create a grid that represents the x and z coordinates of each
+%pixel in physical space
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+%get Nx,dx,Nz, and dz
+foo = size(data);
+Nz = foo(1);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+% woah do you have to guess c to get dz??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1540; %m/s
+dz = .5 * c / 20E6;
+
+% build coordinate matrices
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+% set focus (in meters)
+xf = 0;
+
+% create a time vector
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+% calculate delay
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze).^2) + Ze/c; %[s]
+%Trx = Trx - min(Trx(:));
+Trx = Trx - repmat(min(Trx,[],2),[1 Nx]);
+%
+h=waitbar(0,'processing');
+datad = zeros(size(data)); %delayed data
+for i=1:128
+    datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(:,i)','linear');
+    waitbar(i/128,h);
+end 
+close(h);
+
+% sum
+imf = squeeze(sum(datad,2)); %sum
+imf(isnan(imf))=-1000; %interp1 drops some Nans in here
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% image of delayed and summed data
+Zvec = dz.*linspace(0,Nz-1,Nz); % z axis for plotting time
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Dynamically focused')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+%% Part 5b, Continuous delay and sum (cyst data)
+close all
+clear all
+load('anecoicCystData.mat')
+data = veraStrct.data;
+%imagesc(data(:,:,64),[-100 100])
+
+%First I will create a grid that represents the x and z coordinates of each
+%pixel in physical space
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+%get Nx,dx,Nz, and dz
+foo = size(data);
+Nz = foo(1);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+
+% woah do you have to guess c to get dz??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1540; %m/s
+dz = .5 * c / 20E6;
+
+% build coordinate matrices
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+% set focus (in meters)
+xf = 0;
+
+% create a time vector
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+% calculate delay
+Trx = (1/c)*sqrt((Xe-xf).^2 + (Ze).^2) + Ze/c; %[s]
+%Trx = Trx - min(Trx(:));
+Trx = Trx - repmat(min(Trx,[],2),[1 Nx]);
+%
+h=waitbar(0,'processing');
+datad = zeros(size(data)); %delayed data
+for i=1:128
+    datad(:,i,:) = interp1(t,data(:,i,:),t+Trx(:,i)','linear');
+    waitbar(i/128,h);
+end 
+close(h);
+
+% sum
+imf = squeeze(sum(datad,2)); %sum
+imf(isnan(imf))=-1000; %interp1 drops some Nans in here
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% image of delayed and summed data
+Zvec = dz.*linspace(0,Nz-1,Nz); % z axis for plotting time
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Dynamically focused')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+%% Part 6 Parallel imaging
+% adapted from dynamic focus code... as if that weren't complicated enough
+% each foci will have a slightly different delay profile
+% so calculate a Trx for each
+close all
+%clear all
+%load('pointTargetData.mat')
+
+pff = 2; % parallel focus factor (2,4,8,16)
+data = veraStrct.data;
+%First I will create a grid that represents the x and z coordinates of each
+%pixel in physical space
+Nx = veraStrct.numElementsPerXmt;
+dx = 1E-3*veraStrct.XMTspacingMM;
+
+%get Nx,dx,Nz, and dz
+foo = size(data);
+Nz = foo(1);
+t0 = veraStrct.timeZero -1; % nPts to throw away 
+Nz = foo(1)-t0;
+data = data(t0+1:end,:,:);
+foo = size(data);
+% woah do you have to guess c to get dz??
+% dz = [m/s]*[s/sample] = c * fs^-1 
+c = 1540; %m/s
+dz = .5 * c / 20E6;
+
+% build coordinate matrices
+Xe = repmat(dx.*linspace(-Nx/2,Nx/2,Nx),[Nz 1]);
+Ze = repmat(dz.*linspace(0,Nz-1,Nz)',[1,Nx]);
+
+% create lateral foci vector
+Xf = linspace(-dx*pff/2,dx*pff/2,pff);
+
+Trx = zeros([Nz,Nx,pff]);
+% calculate delay for each focus
+for i=1:pff
+    ttemp = (1/c)*sqrt((Xe-Xf(i)).^2 + (Ze).^2) + Ze/c; %[s] temp delay matrix [Nz x Nx]
+    %Trx = Trx - min(Trx(:));
+    Trx(:,:,i) = ttemp - repmat(min(ttemp,[],2),[1 Nx]);
+end
+
+% create a time vector
+fs = veraStrct.samplingRateMHz;
+t = 1E-6 .*linspace(0,Nz/fs,Nz);
+
+% takeaway beams to artificially simulate parallel foci
+nBeams = foo(3);
+datar = zeros([Nz,Nx,nBeams/pff]); %reduced data [Nz,Nx,nbeams/par_foc_factor]
+f=1;
+for i=1:pff:nBeams
+    datar(:,:,f)=data(:,:,i);
+    f=f+1;
+end
+
+%Now loop through datar and apply delays
+bar = nBeams/pff;
+datad = zeros([Nz Nx bar pff]); %[Nz Nx nBeams/pff pff]
+
+%
+bar = nBeams/pff;
+for i=1:nBeams
+    for j=1:pff
+        datad(:,i,:,j) = interp1(t,datar(:,i,:),t+squeeze(Trx(:,i,j))','linear');
+        %datad(:,i,:,j) = datar(:,i,:);
+    end
+end
+
+datas = squeeze(sum(datad,2));
+
+foo = size(data);
+imf = zeros([foo(1) foo(3)]);%original data size without element dimension
+for i=1:bar
+    for j=1:pff
+        imf(:,i*pff -pff+j) = datas(:,i,j);
+    end
+end
+
+imf(isnan(imf))=-1000; %interp1 drops some Nans in here
+% compress
+imf = 20.*log10(abs(hilbert(imf)));
+
+% image of delayed and summed data
+Zvec = dz.*linspace(0,Nz-1,Nz); % z axis for plotting time
+figure
+imagesc(Xe(1,:).*1000,Zvec.*1000,imf,[10 100])
+colormap('gray')
+title('Parallel Imaging')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+%% display 4 images with different pff
+%pIms = zeros([2353,128,4]);
+figure
+subplot(1,4,1)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,1),[10 100])
+colormap('gray')
+title('2 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+subplot(1,4,2)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,2),[10 100])
+colormap('gray')
+title('4 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+subplot(1,4,3)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,3),[10 100])
+colormap('gray')
+title('8 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+subplot(1,4,4)
+imagesc(Xe(1,:).*1000,Zvec.*1000,pIms(:,:,4),[10 100])
+colormap('gray')
+title('16 parallel foci')
+xlabel('Xe (mm)')
+ylabel('Depth (mm)')
+axis image
+
+%% Part 7 Apodization
+
+
+
+
+##### SOURCE END #####
+--></body></html>

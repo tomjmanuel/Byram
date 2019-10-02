@@ -1,0 +1,626 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>assign2b</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-27"><meta name="DC.source" content="assign2b.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#5">get signal and noise regions</a></li><li><a href="#6">get contrast</a></li><li><a href="#7">get contrast</a></li><li><a href="#8">get contrast</a></li><li><a href="#9">3 Contrasts are</a></li><li><a href="#10">get noise from figs</a></li><li><a href="#11">Contrast to noise ratios</a></li><li><a href="#12">Part 8 Constant F#</a></li><li><a href="#16">apodized, dynamic focus, but not constant f#</a></li></ul></div><pre class="codeinput"><span class="comment">%  Make differene images for showing the effect of</span>
+<span class="comment">%  focusing and apodization</span>
+<span class="comment">%</span>
+<span class="comment">%  This script assumes that the field_init procedure has been called</span>
+<span class="comment">%</span>
+<span class="comment">%  Example by Joergen Arendt Jensen, March 25, 1997.</span>
+<span class="comment">%  constant F# added by Peter Munk, April 8, 1997</span>
+<span class="comment">%  Version 1.2, August 13, 2007, JAJ: Printout changed</span>
+<span class="comment">%</span>
+<span class="comment">%  Generate the transducer apertures for send and receive</span>
+
+f0=3e6;                  <span class="comment">%  Transducer center frequency [Hz]</span>
+fs=100e6;                <span class="comment">%  Sampling frequency [Hz]</span>
+c=1540;                  <span class="comment">%  Speed of sound [m/s]</span>
+lambda=c/f0;             <span class="comment">%  Wavelength [m]</span>
+width=lambda;            <span class="comment">%  Width of element</span>
+element_height=5/1000;   <span class="comment">%  Height of element [m]</span>
+kerf=0.1/1000;           <span class="comment">%  Kerf [m]</span>
+focus=[0 0 70]/1000;     <span class="comment">%  Fixed focal point [m]</span>
+N_elements=128;          <span class="comment">%  Number of physical elements</span>
+N_active=64;             <span class="comment">%  Number of active elements</span>
+xmit_N_active=128;       <span class="comment">%  Number of active transmit elements for constant F#</span>
+rec_N_active=128;	 <span class="comment">%  Number of active receive elements for constant F#</span>
+
+<span class="comment">%  Set the sampling frequency</span>
+
+set_sampling(fs);
+
+<span class="comment">%  Generate aperture for emission</span>
+
+emit_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+<span class="comment">%  Set the impulse response and excitation of the emit aperture</span>
+
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+
+<span class="comment">%  Generate aperture for reception</span>
+
+receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+<span class="comment">%  Set the impulse response for the receive aperture</span>
+
+xdc_impulse (receive_aperture, impulse_response);
+
+<span class="comment">%   Load the computer phantom</span>
+
+[phantom_positions, phantom_amplitudes] = cyst_phantom(10000);
+
+<span class="comment">%   Do linear array imaging</span>
+
+no_lines=20;                         <span class="comment">%  Number of lines in image</span>
+image_width=20/1000;                 <span class="comment">%  Size of image sector</span>
+d_x=image_width/no_lines;            <span class="comment">%  Increment for image</span>
+
+<span class="comment">%  Use 128 elements with 2 mm between receive focuses</span>
+figure
+mecr128a
+</pre><pre class="codeinput">mk_img
+title(<span class="string">'Hamming'</span>)
+</pre><pre class="codeinput">fig = gcf;
+new_env = fig.Children(3).Children.CData;
+</pre><pre class="codeinput">subplot(1,3,3)
+image(XX,ZZ,new_env)
+colormap(gray(128))
+axis(<span class="string">'image'</span>)
+axis([-10 10 10 120])
+title(<span class="string">'Hamming'</span>)
+</pre><h2 id="5">get signal and noise regions</h2><pre class="codeinput">cyst_mask = roipoly();
+noise_mask = roipoly();
+</pre><h2 id="6">get contrast</h2><p>using: C = (Sa -Sb) / (Sa+Sb)</p><pre class="codeinput">temp1 = hann.*noise_mask;
+temp1(isnan(temp1))=0;
+temp2 = hann.*cyst_mask;
+temp2(isnan(temp2))=0;
+Chann = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
+</pre><h2 id="7">get contrast</h2><p>using: C = (Sa -Sb) / (Sa+Sb)</p><pre class="codeinput">temp1 = hamm.*noise_mask;
+temp1(isnan(temp1))=0;
+temp2 = hamm.*cyst_mask;
+temp2(isnan(temp2))=0;
+Chamm = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
+</pre><h2 id="8">get contrast</h2><p>using: C = (Sa -Sb) / (Sa+Sb)</p><pre class="codeinput">temp1 = uno.*noise_mask;
+temp1(isnan(temp1))=0;
+temp2 = uno.*cyst_mask;
+temp2(isnan(temp2))=0;
+Cno_apo = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
+</pre><h2 id="9">3 Contrasts are</h2><p>no apodization: .2602 hanning: .3798 hamming .4874</p><h2 id="10">get noise from figs</h2><pre class="codeinput">im = fig.Children(1).Children.CData;
+noise_mask = roipoly;
+temp1 = im(noise_mask);
+noiseham = std(temp1);
+</pre><h2 id="11">Contrast to noise ratios</h2><p>I used roipoly to get noise for each</p><pre class="codeinput">CNR_noapo = Cno_apo/noisena;  <span class="comment">% 0.0163</span>
+CNR_hann = Chann/noisehan;    <span class="comment">% 0.0086</span>
+CNR_hamm = Chamm/noiseham;    <span class="comment">% 0.0139</span>
+</pre><h2 id="12">Part 8 Constant F#</h2><p>make a mask showing binary aperature for different depths</p><pre class="codeinput"><span class="comment">%calc number of elements to use</span>
+dim = size(image_data);
+Fnumber_rec = 2;
+rec_N_active_dyn=round(((1:n)/fn+min_sample/fs)*1540/2/(Fnumber_rec*(width+kerf)));
+<span class="comment">% construct 2d matrix</span>
+</pre><pre class="codeinput"><span class="comment">%implement</span>
+f0=3e6;                  <span class="comment">%  Transducer center frequency [Hz]</span>
+fs=100e6;                <span class="comment">%  Sampling frequency [Hz]</span>
+c=1540;                  <span class="comment">%  Speed of sound [m/s]</span>
+lambda=c/f0;             <span class="comment">%  Wavelength [m]</span>
+width=lambda;            <span class="comment">%  Width of element</span>
+element_height=5/1000;   <span class="comment">%  Height of element [m]</span>
+kerf=0.1/1000;           <span class="comment">%  Kerf [m]</span>
+focus=[0 0 70]/1000;     <span class="comment">%  Fixed focal point [m]</span>
+N_elements=128;          <span class="comment">%  Number of physical elements</span>
+N_active=64;             <span class="comment">%  Number of active elements</span>
+xmit_N_active=128;       <span class="comment">%  Number of active transmit elements for constant F#</span>
+rec_N_active=128;	 <span class="comment">%  Number of active receive elements for constant F#</span>
+
+<span class="comment">%  Set the sampling frequency</span>
+
+set_sampling(fs);
+
+<span class="comment">%  Generate aperture for emission</span>
+
+emit_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+<span class="comment">%  Set the impulse response and excitation of the emit aperture</span>
+
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+
+<span class="comment">%  Generate aperture for reception</span>
+
+receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+<span class="comment">%  Set the impulse response for the receive aperture</span>
+
+xdc_impulse (receive_aperture, impulse_response);
+
+<span class="comment">%   Load the computer phantom</span>
+
+[phantom_positions, phantom_amplitudes] = pts_pha;
+
+<span class="comment">%   Do linear array imaging</span>
+
+no_lines=20;                         <span class="comment">%  Number of lines in image</span>
+image_width=20/1000;                 <span class="comment">%  Size of image sector</span>
+d_x=image_width/no_lines;            <span class="comment">%  Increment for image</span>
+
+
+
+ <span class="comment">%  Use 128 elements instead with apodization</span>
+ <span class="comment">% constant F# rec=2 and xmit=4</span>
+
+disp(<span class="string">'Constant F# number focusing'</span>)
+<span class="comment">%  The different focal zones for transmit</span>
+
+xmit_focal_zones_center=[10 20 40 80]'/1000; <span class="comment">% focuspoints</span>
+xmit_focal_zones=[0 15 30 60]'/1000; <span class="comment">% start of zone [m]</span>
+Nft=max(size(xmit_focal_zones));
+focus_times_xmit=xmit_focal_zones/1540;
+
+
+<span class="comment">%  Set a Hanning apodization on the receive aperture</span>
+<span class="comment">%  Dynamic opening aperture is used.</span>
+
+Fnumber_xmit=4.0;
+xmit_N_active_dyn=round(xmit_focal_zones_center./(Fnumber_xmit*(width+kerf)));
+
+<span class="keyword">for</span> ii=1:Nft
+ <span class="keyword">if</span> xmit_N_active_dyn(ii)&gt;xmit_N_active
+   xmit_N_active_dyn(ii)=xmit_N_active; <span class="keyword">end</span>
+ xmit_N_pre_dyn(ii) = ceil(xmit_N_active/2  - xmit_N_active_dyn(ii)/2);
+ xmit_N_post_dyn(ii) = xmit_N_active - xmit_N_pre_dyn(ii) - xmit_N_active_dyn(ii);
+ xmit_apo=(hanning(xmit_N_active_dyn(ii)))';
+ xmit_apo_matrix_sub(ii,:)=[zeros(1,xmit_N_pre_dyn(ii)) xmit_apo zeros(1,xmit_N_post_dyn(ii))];
+<span class="keyword">end</span>
+apo_zero=(N_elements-xmit_N_active)/2;
+xmit_apo_matrix=[zeros(Nft,apo_zero) xmit_apo_matrix_sub zeros(Nft,apo_zero)];
+
+<span class="comment">%**********************************************************</span>
+<span class="comment">%                      RECEIVE</span>
+<span class="comment">%**********************************************************</span>
+
+<span class="comment">%  The different focal zones for receive</span>
+
+<span class="comment">%  Set the different focal zones for reception</span>
+
+rec_zone_start=30/1000;
+rec_zone_stop=150/1000;
+rec_zone_size=20/1000;
+
+rec_focal_zones_center=[rec_zone_start:rec_zone_size:rec_zone_stop]';
+rec_focal_zones=rec_focal_zones_center-0.5*rec_zone_size;
+Nfr=max(size(rec_focal_zones));
+focus_times_rec=rec_focal_zones/1540;
+
+
+<span class="comment">%  Set a Hanning apodization on the receive aperture</span>
+<span class="comment">%  Dynamic opening aperture is used.</span>
+
+Fnumber_rec=2.0;
+rec_N_active_dyn=round(rec_focal_zones_center./(Fnumber_rec*(width+kerf)));
+</pre><pre class="codeinput"><span class="keyword">for</span> ii=1:Nfr
+ <span class="keyword">if</span> rec_N_active_dyn(ii)&gt;rec_N_active
+   rec_N_active_dyn(ii)=rec_N_active; <span class="keyword">end</span>
+ rec_N_pre_dyn(ii) = ceil(rec_N_active/2  - rec_N_active_dyn(ii)/2);
+ rec_N_post_dyn(ii) = rec_N_active - rec_N_pre_dyn(ii) - rec_N_active_dyn(ii);
+ rec_apo=(hanning(rec_N_active_dyn(ii)))';
+ rec_apo_matrix_sub(ii,:)=[zeros(1,rec_N_pre_dyn(ii)) rec_apo zeros(1,rec_N_post_dyn(ii))];
+<span class="keyword">end</span>
+apo_zero=(N_elements-rec_N_active)/2;
+rec_apo_matrix=[zeros(Nfr,apo_zero) rec_apo_matrix_sub zeros(Nfr,apo_zero)];
+
+<span class="comment">%**********************************************************</span>
+<span class="comment">%                      MAKE IMAGE</span>
+<span class="comment">%**********************************************************</span>
+
+x= -image_width/2;
+image_data=0;
+<span class="keyword">for</span> i=1:no_lines
+ <span class="comment">% Set the focus for this direction (aperture times points(x,y,z))</span>
+
+  xdc_center_focus (emit_aperture,[x 0 0]);
+  xdc_focus (emit_aperture, focus_times_xmit, [x*ones(Nft,1), zeros(Nft,1), xmit_focal_zones_center]);
+  xdc_center_focus (receive_aperture,[x 0 0]);
+  xdc_focus (receive_aperture, focus_times_rec, [x*ones(Nfr,1), zeros(Nfr,1), rec_focal_zones_center]);
+
+   <span class="comment">%  Calculate the apodization</span>
+
+  xdc_apodization (emit_aperture, focus_times_xmit, xmit_apo_matrix);
+  xdc_apodization (receive_aperture, focus_times_rec , rec_apo_matrix);
+
+  <span class="comment">%   Calculate the received response</span>
+
+  [v, t1]=calc_scat(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
+
+  <span class="comment">%  Store the result</span>
+
+  image_data(1:max(size(v)),i)=v;
+  times(i) = t1;
+
+  <span class="comment">%  Steer in another angle</span>
+
+  x = x + d_x;
+<span class="keyword">end</span>
+mk_img
+title(<span class="string">'Constant F#'</span>)
+</pre><p>show binary image of aperature mask</p><pre class="codeinput">imagesc(1:128,rec_focal_zones_center.*1000, rec_apo_matrix&gt;.07)
+xlabel(<span class="string">'Elements'</span>)
+ylabel(<span class="string">'Focal Depth (mm) (I used 7 discrete depths)'</span>)
+title(<span class="string">'F# mask'</span>)
+</pre><h2 id="16">apodized, dynamic focus, but not constant f#</h2><pre class="codeinput">figure
+mecr128a
+mk_img
+title(<span class="string">'Hamming'</span>)
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%  Make differene images for showing the effect of
+%  focusing and apodization
+%
+%  This script assumes that the field_init procedure has been called
+%
+%  Example by Joergen Arendt Jensen, March 25, 1997.
+%  constant F# added by Peter Munk, April 8, 1997
+%  Version 1.2, August 13, 2007, JAJ: Printout changed
+%
+%  Generate the transducer apertures for send and receive
+
+f0=3e6;                  %  Transducer center frequency [Hz]
+fs=100e6;                %  Sampling frequency [Hz]
+c=1540;                  %  Speed of sound [m/s]
+lambda=c/f0;             %  Wavelength [m]
+width=lambda;            %  Width of element
+element_height=5/1000;   %  Height of element [m]
+kerf=0.1/1000;           %  Kerf [m]
+focus=[0 0 70]/1000;     %  Fixed focal point [m]
+N_elements=128;          %  Number of physical elements
+N_active=64;             %  Number of active elements
+xmit_N_active=128;       %  Number of active transmit elements for constant F#
+rec_N_active=128;	 %  Number of active receive elements for constant F#
+
+%  Set the sampling frequency 
+
+set_sampling(fs);
+
+%  Generate aperture for emission
+
+emit_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+%  Set the impulse response and excitation of the emit aperture
+
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+
+%  Generate aperture for reception
+
+receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+%  Set the impulse response for the receive aperture
+
+xdc_impulse (receive_aperture, impulse_response);
+
+%   Load the computer phantom
+
+[phantom_positions, phantom_amplitudes] = cyst_phantom(10000);
+
+%   Do linear array imaging
+
+no_lines=20;                         %  Number of lines in image
+image_width=20/1000;                 %  Size of image sector
+d_x=image_width/no_lines;            %  Increment for image
+
+%  Use 128 elements with 2 mm between receive focuses
+figure
+mecr128a
+%%
+mk_img
+title('Hamming')
+
+
+%%
+fig = gcf;
+new_env = fig.Children(3).Children.CData;
+%%
+subplot(1,3,3)
+image(XX,ZZ,new_env)
+colormap(gray(128))
+axis('image')
+axis([-10 10 10 120])
+title('Hamming')
+
+%% get signal and noise regions
+cyst_mask = roipoly();
+noise_mask = roipoly();
+
+
+%% get contrast
+% using: C = (Sa -Sb) / (Sa+Sb)
+temp1 = hann.*noise_mask;
+temp1(isnan(temp1))=0;
+temp2 = hann.*cyst_mask;
+temp2(isnan(temp2))=0;
+Chann = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
+%% get contrast
+% using: C = (Sa -Sb) / (Sa+Sb)
+temp1 = hamm.*noise_mask;
+temp1(isnan(temp1))=0;
+temp2 = hamm.*cyst_mask;
+temp2(isnan(temp2))=0;
+Chamm = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
+
+%% get contrast
+% using: C = (Sa -Sb) / (Sa+Sb)
+temp1 = uno.*noise_mask;
+temp1(isnan(temp1))=0;
+temp2 = uno.*cyst_mask;
+temp2(isnan(temp2))=0;
+Cno_apo = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
+%% 3 Contrasts are
+% no apodization: .2602
+% hanning: .3798
+% hamming .4874
+
+%% get noise from figs
+im = fig.Children(1).Children.CData;
+noise_mask = roipoly;
+temp1 = im(noise_mask);
+noiseham = std(temp1);
+
+%% Contrast to noise ratios
+% I used roipoly to get noise for each
+CNR_noapo = Cno_apo/noisena;  % 0.0163
+CNR_hann = Chann/noisehan;    % 0.0086
+CNR_hamm = Chamm/noiseham;    % 0.0139
+
+
+%% Part 8 Constant F#
+% make a mask showing binary aperature for different depths
+%calc number of elements to use
+dim = size(image_data);
+Fnumber_rec = 2;
+rec_N_active_dyn=round(((1:n)/fn+min_sample/fs)*1540/2/(Fnumber_rec*(width+kerf)));
+% construct 2d matrix
+
+
+%%
+%implement
+f0=3e6;                  %  Transducer center frequency [Hz]
+fs=100e6;                %  Sampling frequency [Hz]
+c=1540;                  %  Speed of sound [m/s]
+lambda=c/f0;             %  Wavelength [m]
+width=lambda;            %  Width of element
+element_height=5/1000;   %  Height of element [m]
+kerf=0.1/1000;           %  Kerf [m]
+focus=[0 0 70]/1000;     %  Fixed focal point [m]
+N_elements=128;          %  Number of physical elements
+N_active=64;             %  Number of active elements
+xmit_N_active=128;       %  Number of active transmit elements for constant F#
+rec_N_active=128;	 %  Number of active receive elements for constant F#
+
+%  Set the sampling frequency 
+
+set_sampling(fs);
+
+%  Generate aperture for emission
+
+emit_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+%  Set the impulse response and excitation of the emit aperture
+
+impulse_response=sin(2*pi*f0*(0:1/fs:2/f0));
+impulse_response=impulse_response.*hanning(max(size(impulse_response)))';
+xdc_impulse (emit_aperture, impulse_response);
+
+excitation=sin(2*pi*f0*(0:1/fs:2/f0));
+xdc_excitation (emit_aperture, excitation);
+
+%  Generate aperture for reception
+
+receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1, 1,focus);
+
+%  Set the impulse response for the receive aperture
+
+xdc_impulse (receive_aperture, impulse_response);
+
+%   Load the computer phantom
+
+[phantom_positions, phantom_amplitudes] = pts_pha;
+
+%   Do linear array imaging
+
+no_lines=20;                         %  Number of lines in image
+image_width=20/1000;                 %  Size of image sector
+d_x=image_width/no_lines;            %  Increment for image
+
+
+
+ %  Use 128 elements instead with apodization 
+ % constant F# rec=2 and xmit=4
+
+disp('Constant F# number focusing')
+%  The different focal zones for transmit
+
+xmit_focal_zones_center=[10 20 40 80]'/1000; % focuspoints
+xmit_focal_zones=[0 15 30 60]'/1000; % start of zone [m]
+Nft=max(size(xmit_focal_zones));
+focus_times_xmit=xmit_focal_zones/1540;
+
+
+%  Set a Hanning apodization on the receive aperture
+%  Dynamic opening aperture is used.
+
+Fnumber_xmit=4.0;
+xmit_N_active_dyn=round(xmit_focal_zones_center./(Fnumber_xmit*(width+kerf)));
+
+for ii=1:Nft
+ if xmit_N_active_dyn(ii)>xmit_N_active 
+   xmit_N_active_dyn(ii)=xmit_N_active; end
+ xmit_N_pre_dyn(ii) = ceil(xmit_N_active/2  - xmit_N_active_dyn(ii)/2);
+ xmit_N_post_dyn(ii) = xmit_N_active - xmit_N_pre_dyn(ii) - xmit_N_active_dyn(ii);
+ xmit_apo=(hanning(xmit_N_active_dyn(ii)))';
+ xmit_apo_matrix_sub(ii,:)=[zeros(1,xmit_N_pre_dyn(ii)) xmit_apo zeros(1,xmit_N_post_dyn(ii))];
+end
+apo_zero=(N_elements-xmit_N_active)/2;
+xmit_apo_matrix=[zeros(Nft,apo_zero) xmit_apo_matrix_sub zeros(Nft,apo_zero)];
+
+%**********************************************************
+%                      RECEIVE
+%**********************************************************
+
+%  The different focal zones for receive
+
+%  Set the different focal zones for reception
+
+rec_zone_start=30/1000;
+rec_zone_stop=150/1000;
+rec_zone_size=20/1000;
+
+rec_focal_zones_center=[rec_zone_start:rec_zone_size:rec_zone_stop]';
+rec_focal_zones=rec_focal_zones_center-0.5*rec_zone_size;
+Nfr=max(size(rec_focal_zones));
+focus_times_rec=rec_focal_zones/1540;
+
+
+%  Set a Hanning apodization on the receive aperture
+%  Dynamic opening aperture is used.
+
+Fnumber_rec=2.0;
+rec_N_active_dyn=round(rec_focal_zones_center./(Fnumber_rec*(width+kerf)));
+%%
+for ii=1:Nfr
+ if rec_N_active_dyn(ii)>rec_N_active 
+   rec_N_active_dyn(ii)=rec_N_active; end
+ rec_N_pre_dyn(ii) = ceil(rec_N_active/2  - rec_N_active_dyn(ii)/2);
+ rec_N_post_dyn(ii) = rec_N_active - rec_N_pre_dyn(ii) - rec_N_active_dyn(ii);
+ rec_apo=(hanning(rec_N_active_dyn(ii)))';
+ rec_apo_matrix_sub(ii,:)=[zeros(1,rec_N_pre_dyn(ii)) rec_apo zeros(1,rec_N_post_dyn(ii))];
+end
+apo_zero=(N_elements-rec_N_active)/2;
+rec_apo_matrix=[zeros(Nfr,apo_zero) rec_apo_matrix_sub zeros(Nfr,apo_zero)];
+
+%**********************************************************
+%                      MAKE IMAGE
+%**********************************************************
+
+x= -image_width/2;
+image_data=0;
+for i=1:no_lines
+ % Set the focus for this direction (aperture times points(x,y,z))
+
+  xdc_center_focus (emit_aperture,[x 0 0]);
+  xdc_focus (emit_aperture, focus_times_xmit, [x*ones(Nft,1), zeros(Nft,1), xmit_focal_zones_center]);
+  xdc_center_focus (receive_aperture,[x 0 0]);
+  xdc_focus (receive_aperture, focus_times_rec, [x*ones(Nfr,1), zeros(Nfr,1), rec_focal_zones_center]);
+
+   %  Calculate the apodization 
+
+  xdc_apodization (emit_aperture, focus_times_xmit, xmit_apo_matrix);
+  xdc_apodization (receive_aperture, focus_times_rec , rec_apo_matrix);
+
+  %   Calculate the received response
+
+  [v, t1]=calc_scat(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
+
+  %  Store the result
+
+  image_data(1:max(size(v)),i)=v;
+  times(i) = t1;
+
+  %  Steer in another angle
+
+  x = x + d_x;
+end
+mk_img
+title('Constant F#')
+%%
+% show binary image of aperature mask
+imagesc(1:128,rec_focal_zones_center.*1000, rec_apo_matrix>.07)
+xlabel('Elements')
+ylabel('Focal Depth (mm) (I used 7 discrete depths)')
+title('F# mask')
+
+%% apodized, dynamic focus, but not constant f#
+
+figure
+mecr128a
+mk_img
+title('Hamming')
+
+
+##### SOURCE END #####
+--></body></html>

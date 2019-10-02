@@ -11,9 +11,9 @@
 
 function [positions, amp] = point_phantom 
 
-dz=5/1000;        %  Distance between points [m]
+dz=10/1000;        %  Distance between points [m]
 z_start=10/1000;  %  Start of point [m]
-Npoints=20;       %  Number of point targets
+Npoints=5;       %  Number of point targets
 
 %  Create the point scatterers positions
 

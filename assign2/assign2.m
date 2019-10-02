@@ -72,12 +72,12 @@ imf = 20.*log10(abs(hilbert(imf)));
 % Part 4 deliverables Point target
 % image of original channel data
 % make vector representing depth
-
+%%
 figure
 subplot(1,3,1)
 imagesc(im0(900*usf:1100*usf,:),[10 100])
 colormap('gray')
-title('Original channel data (zoomed and saturated)')
+title('Original channel data')
 xlabel('Xe (px)')
 ylabel('Depth (px)')
 
@@ -85,7 +85,7 @@ ylabel('Depth (px)')
 subplot(1,3,2)
 imagesc(imd(900*usf:1100*usf,:),[10 100])
 colormap('gray')
-title('Delayed channel data (zoomed and saturated)')
+title('Delayed channel data')
 xlabel('Xe (px)')
 ylabel('Depth (px)')
 
@@ -308,10 +308,10 @@ axis image
 % each foci will have a slightly different delay profile
 % so calculate a Trx for each
 close all
-clear all
-load('pointTargetData.mat')
+%clear all
+%load('pointTargetData.mat')
 
-pff = 16; % parallel focus factor (2,4,8,16)
+pff = 2; % parallel focus factor (2,4,8,16)
 data = veraStrct.data;
 %First I will create a grid that represents the x and z coordinates of each
 %pixel in physical space

@@ -39,15 +39,12 @@ for i=1:no_lines
 %  Do logarithmic compression to a 50 dB dynamic range
 
 log_env=20*log10(env);
-log_env=log_env-max(max(log_env)) + 50;
-log_env=127*log_env/50;
+log_env=log_env-max(max(log_env));
 
-%  Set values -80 dB to -80 dB
-
-log_env=(log_env > -80).*log_env + (log_env < -80)*(-80);
+% set lower cutoff at 200 dB
+log_env(log_env<-200)=-200;
 
 %  Make an interpolated image
-
 ID=5;
 [n,m]=size(log_env);
 new_env=zeros(n,m*ID);
@@ -56,10 +53,16 @@ for i=1:n
   end
 [n,m]=size(new_env);
   
+% now plot with appropriate axis
+% we need n points that range from 0 to Zmm and m points for 0 to Xmm
+% what is Zmm? dpdentent on fs, speed of sound, minimum sample from times,
 fn=fs/D;
-image(((1:(ID*no_lines-1))*d_x/ID-no_lines*d_x/2)*1000,((1:n)/fn+min_sample/fs)*1540/2*1000,new_env)
-colormap(gray(128))
-axis('image')
-axis([-10 10 10 120])
-axis off
-drawnow
+zz =((1:n)/fn+min_sample/fs)*1540/2*1000;
+
+% Xmm is dependent on no_lines, dx, and interpolation factor
+xx = ((1:(ID*no_lines))*d_x/ID-no_lines*d_x/2)*1000;
+
+% figure
+% imagesc(xx,zz,new_env,[-50 0])
+% axis image
+% colormap(gray)
