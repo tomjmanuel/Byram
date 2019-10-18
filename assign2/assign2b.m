@@ -71,14 +71,21 @@ title('Ones')
 %%
 mk_img_tom_forCNR
 
-%% create a struct that saves means and stds for diff windows
+%%
+hcys = env(cyst_mask);
+hc = env(noise_mask);
+uhanCyst = mean(hcys);
+uhanClut = mean(hc);
+stdhanCyst = std(hcys);
+stdhanClut = std(hc);
+%% create a struct that saves means and stds for diff windows incase I need to come back
 % all the prep done in command line
 win_results.uhamClut = uhamClut;
 win_results.uhamCyst = uhamCyst;
 win_results.stdhamClut = stdhamNCyst;
 win_results.stdhamCyst = stdhamCyst;
 win_results.uhanClut = uhanClut;
-win_results.uhamCyst = uhanCyst;
+win_results.uhanCyst = uhanCyst;
 win_results.stdhanClut = stdhanClut;
 win_results.stdhanCyst = stdhanCyst;
 win_results.uoneCyst = uonecyst;
@@ -88,19 +95,16 @@ win_results.stdonenoise = stdonenoise;
 
 save('windowing_results.mat','win_results');
 
+%% Calculate contrasts
+Con_noap = -20*log10(uonecyst/uonenoise); %4.5
+Con_ham = -20*log10(uhamCyst/uhamClut); %29
+Con_hann = -20*log10(uhanCyst/uhanClut); %41
 
+%% Calculate CNR
+CNR_noap = 20*log10(abs(uonenoise-uonecyst)/sqrt(stdonecyst^2+stdonenoise^2)); %-9.9
+CNR_ham = 20*log10(abs(uhamClut-uhamCyst)/sqrt(stdhamCyst^2+stdhamNCyst^2)); %1.63
+CNR_han = 20*log10(abs(uhanCyst-uhanClut)/sqrt(stdhanCyst^2+stdhanClut^2)); %1.13
 
-
-%%
-fig = gcf;
-new_env = fig.Children(3).Children.CData;
-%%
-subplot(1,3,3)
-image(XX,ZZ,new_env)
-colormap(gray(128))
-axis('image')
-axis([-10 10 10 120])
-title('Hamming')
 
 %% get signal and noise regions
 cyst_mask = roipoly();

@@ -28,8 +28,8 @@ for i=1:no_lines
 
    %  Calculate the apodization 
    
-  xdc_apodization (emit_aperture, 0, ones([N_elements 1])');
-  xdc_apodization (receive_aperture, 0, ones([N_elements 1])');
+  xdc_apodization (emit_aperture, 0, hanning(N_elements)');
+  xdc_apodization (receive_aperture, 0, hanning(N_elements)');
 
   %   Calculate the received response
 

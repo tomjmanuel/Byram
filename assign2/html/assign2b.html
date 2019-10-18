@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>assign2b</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-09-27"><meta name="DC.source" content="assign2b.m"><style type="text/css">
+      --><title>assign2b</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-10-02"><meta name="DC.source" content="assign2b.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#5">get signal and noise regions</a></li><li><a href="#6">get contrast</a></li><li><a href="#7">get contrast</a></li><li><a href="#8">get contrast</a></li><li><a href="#9">3 Contrasts are</a></li><li><a href="#10">get noise from figs</a></li><li><a href="#11">Contrast to noise ratios</a></li><li><a href="#12">Part 8 Constant F#</a></li><li><a href="#16">apodized, dynamic focus, but not constant f#</a></li></ul></div><pre class="codeinput"><span class="comment">%  Make differene images for showing the effect of</span>
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#5">create a struct that saves means and stds for diff windows incase I need to come back</a></li><li><a href="#6">Calculate contrasts</a></li><li><a href="#7">Calculate CNR</a></li><li><a href="#8">get signal and noise regions</a></li><li><a href="#9">Part 8 Constant F#</a></li><li><a href="#13">apodized, dynamic focus, but not constant f#</a></li></ul></div><pre class="codeinput"><span class="comment">%  Make differene images for showing the effect of</span>
 <span class="comment">%  focusing and apodization</span>
 <span class="comment">%</span>
 <span class="comment">%  This script assumes that the field_init procedure has been called</span>
@@ -116,53 +116,53 @@ receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1,
 xdc_impulse (receive_aperture, impulse_response);
 
 <span class="comment">%   Load the computer phantom</span>
-
 [phantom_positions, phantom_amplitudes] = cyst_phantom(10000);
 
 <span class="comment">%   Do linear array imaging</span>
 
 no_lines=20;                         <span class="comment">%  Number of lines in image</span>
-image_width=20/1000;                 <span class="comment">%  Size of image sector</span>
+image_width=no_lines/1000;                 <span class="comment">%  Size of image sector</span>
 d_x=image_width/no_lines;            <span class="comment">%  Increment for image</span>
 
 <span class="comment">%  Use 128 elements with 2 mm between receive focuses</span>
-figure
+
 mecr128a
-</pre><pre class="codeinput">mk_img
-title(<span class="string">'Hamming'</span>)
-</pre><pre class="codeinput">fig = gcf;
-new_env = fig.Children(3).Children.CData;
-</pre><pre class="codeinput">subplot(1,3,3)
-image(XX,ZZ,new_env)
-colormap(gray(128))
-axis(<span class="string">'image'</span>)
-axis([-10 10 10 120])
-title(<span class="string">'Hamming'</span>)
-</pre><h2 id="5">get signal and noise regions</h2><pre class="codeinput">cyst_mask = roipoly();
+</pre><pre class="codeinput">mk_img_tom
+subplot(1,3,1)
+imagesc(xx,zz(100:250),new_env(100:250,:),[-50 0])
+axis <span class="string">image</span>
+colormap(gray)
+title(<span class="string">'Ones'</span>)
+</pre><pre class="codeinput">mk_img_tom_forCNR
+</pre><pre class="codeinput">hcys = env(cyst_mask);
+hc = env(noise_mask);
+uhanCyst = mean(hcys);
+uhanClut = mean(hc);
+stdhanCyst = std(hcys);
+stdhanClut = std(hc);
+</pre><h2 id="5">create a struct that saves means and stds for diff windows incase I need to come back</h2><p>all the prep done in command line</p><pre class="codeinput">win_results.uhamClut = uhamClut;
+win_results.uhamCyst = uhamCyst;
+win_results.stdhamClut = stdhamNCyst;
+win_results.stdhamCyst = stdhamCyst;
+win_results.uhanClut = uhanClut;
+win_results.uhanCyst = uhanCyst;
+win_results.stdhanClut = stdhanClut;
+win_results.stdhanCyst = stdhanCyst;
+win_results.uoneCyst = uonecyst;
+win_results.uonenoise = uonenoise;
+win_results.stdonecyst = stdonecyst;
+win_results.stdonenoise = stdonenoise;
+
+save(<span class="string">'windowing_results.mat'</span>,<span class="string">'win_results'</span>);
+</pre><h2 id="6">Calculate contrasts</h2><pre class="codeinput">Con_noap = -20*log10(uonecyst/uonenoise); <span class="comment">%4.5</span>
+Con_ham = -20*log10(uhamCyst/uhamClut); <span class="comment">%29</span>
+Con_hann = -20*log10(uhanCyst/uhanClut); <span class="comment">%41</span>
+</pre><h2 id="7">Calculate CNR</h2><pre class="codeinput">CNR_noap = 20*log10(abs(uonenoise-uonecyst)/sqrt(stdonecyst^2+stdonenoise^2)); <span class="comment">%-9.9</span>
+CNR_ham = 20*log10(abs(uhamClut-uhamCyst)/sqrt(stdhamCyst^2+stdhamNCyst^2)); <span class="comment">%1.63</span>
+CNR_han = 20*log10(abs(uhanCyst-uhanClut)/sqrt(stdhanCyst^2+stdhanClut^2)); <span class="comment">%1.13</span>
+</pre><h2 id="8">get signal and noise regions</h2><pre class="codeinput">cyst_mask = roipoly();
 noise_mask = roipoly();
-</pre><h2 id="6">get contrast</h2><p>using: C = (Sa -Sb) / (Sa+Sb)</p><pre class="codeinput">temp1 = hann.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = hann.*cyst_mask;
-temp2(isnan(temp2))=0;
-Chann = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-</pre><h2 id="7">get contrast</h2><p>using: C = (Sa -Sb) / (Sa+Sb)</p><pre class="codeinput">temp1 = hamm.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = hamm.*cyst_mask;
-temp2(isnan(temp2))=0;
-Chamm = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-</pre><h2 id="8">get contrast</h2><p>using: C = (Sa -Sb) / (Sa+Sb)</p><pre class="codeinput">temp1 = uno.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = uno.*cyst_mask;
-temp2(isnan(temp2))=0;
-Cno_apo = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-</pre><h2 id="9">3 Contrasts are</h2><p>no apodization: .2602 hanning: .3798 hamming .4874</p><h2 id="10">get noise from figs</h2><pre class="codeinput">im = fig.Children(1).Children.CData;
-noise_mask = roipoly;
-temp1 = im(noise_mask);
-noiseham = std(temp1);
-</pre><h2 id="11">Contrast to noise ratios</h2><p>I used roipoly to get noise for each</p><pre class="codeinput">CNR_noapo = Cno_apo/noisena;  <span class="comment">% 0.0163</span>
-CNR_hann = Chann/noisehan;    <span class="comment">% 0.0086</span>
-CNR_hamm = Chamm/noiseham;    <span class="comment">% 0.0139</span>
-</pre><h2 id="12">Part 8 Constant F#</h2><p>make a mask showing binary aperature for different depths</p><pre class="codeinput"><span class="comment">%calc number of elements to use</span>
+</pre><h2 id="9">Part 8 Constant F#</h2><p>make a mask showing binary aperature for different depths</p><pre class="codeinput"><span class="comment">%calc number of elements to use</span>
 dim = size(image_data);
 Fnumber_rec = 2;
 rec_N_active_dyn=round(((1:n)/fn+min_sample/fs)*1540/2/(Fnumber_rec*(width+kerf)));
@@ -319,7 +319,7 @@ title(<span class="string">'Constant F#'</span>)
 xlabel(<span class="string">'Elements'</span>)
 ylabel(<span class="string">'Focal Depth (mm) (I used 7 discrete depths)'</span>)
 title(<span class="string">'F# mask'</span>)
-</pre><h2 id="16">apodized, dynamic focus, but not constant f#</h2><pre class="codeinput">figure
+</pre><h2 id="13">apodized, dynamic focus, but not constant f#</h2><pre class="codeinput">figure
 mecr128a
 mk_img
 title(<span class="string">'Hamming'</span>)
@@ -375,77 +375,69 @@ receive_aperture = xdc_linear_array (N_elements, width, element_height, kerf, 1,
 xdc_impulse (receive_aperture, impulse_response);
 
 %   Load the computer phantom
-
 [phantom_positions, phantom_amplitudes] = cyst_phantom(10000);
 
 %   Do linear array imaging
 
 no_lines=20;                         %  Number of lines in image
-image_width=20/1000;                 %  Size of image sector
+image_width=no_lines/1000;                 %  Size of image sector
 d_x=image_width/no_lines;            %  Increment for image
 
 %  Use 128 elements with 2 mm between receive focuses
-figure
+
 mecr128a
 %%
-mk_img
-title('Hamming')
 
+mk_img_tom
+subplot(1,3,1)
+imagesc(xx,zz(100:250),new_env(100:250,:),[-50 0])
+axis image
+colormap(gray)
+title('Ones')
 
 %%
-fig = gcf;
-new_env = fig.Children(3).Children.CData;
+mk_img_tom_forCNR
+
 %%
-subplot(1,3,3)
-image(XX,ZZ,new_env)
-colormap(gray(128))
-axis('image')
-axis([-10 10 10 120])
-title('Hamming')
+hcys = env(cyst_mask);
+hc = env(noise_mask);
+uhanCyst = mean(hcys);
+uhanClut = mean(hc);
+stdhanCyst = std(hcys);
+stdhanClut = std(hc);
+%% create a struct that saves means and stds for diff windows incase I need to come back
+% all the prep done in command line
+win_results.uhamClut = uhamClut;
+win_results.uhamCyst = uhamCyst;
+win_results.stdhamClut = stdhamNCyst;
+win_results.stdhamCyst = stdhamCyst;
+win_results.uhanClut = uhanClut;
+win_results.uhanCyst = uhanCyst;
+win_results.stdhanClut = stdhanClut;
+win_results.stdhanCyst = stdhanCyst;
+win_results.uoneCyst = uonecyst;
+win_results.uonenoise = uonenoise;
+win_results.stdonecyst = stdonecyst;
+win_results.stdonenoise = stdonenoise;
+
+save('windowing_results.mat','win_results');
+
+%% Calculate contrasts
+Con_noap = -20*log10(uonecyst/uonenoise); %4.5
+Con_ham = -20*log10(uhamCyst/uhamClut); %29
+Con_hann = -20*log10(uhanCyst/uhanClut); %41
+
+%% Calculate CNR
+CNR_noap = 20*log10(abs(uonenoise-uonecyst)/sqrt(stdonecyst^2+stdonenoise^2)); %-9.9
+CNR_ham = 20*log10(abs(uhamClut-uhamCyst)/sqrt(stdhamCyst^2+stdhamNCyst^2)); %1.63
+CNR_han = 20*log10(abs(uhanCyst-uhanClut)/sqrt(stdhanCyst^2+stdhanClut^2)); %1.13
+
 
 %% get signal and noise regions
 cyst_mask = roipoly();
 noise_mask = roipoly();
 
 
-%% get contrast
-% using: C = (Sa -Sb) / (Sa+Sb)
-temp1 = hann.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = hann.*cyst_mask;
-temp2(isnan(temp2))=0;
-Chann = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-%% get contrast
-% using: C = (Sa -Sb) / (Sa+Sb)
-temp1 = hamm.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = hamm.*cyst_mask;
-temp2(isnan(temp2))=0;
-Chamm = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-
-%% get contrast
-% using: C = (Sa -Sb) / (Sa+Sb)
-temp1 = uno.*noise_mask;
-temp1(isnan(temp1))=0;
-temp2 = uno.*cyst_mask;
-temp2(isnan(temp2))=0;
-Cno_apo = (mean(temp1(:)) - mean(temp2(:)))/(mean(temp2(:))+mean(temp1(:)));
-%% 3 Contrasts are
-% no apodization: .2602
-% hanning: .3798
-% hamming .4874
-
-%% get noise from figs
-im = fig.Children(1).Children.CData;
-noise_mask = roipoly;
-temp1 = im(noise_mask);
-noiseham = std(temp1);
-
-%% Contrast to noise ratios
-% I used roipoly to get noise for each
-CNR_noapo = Cno_apo/noisena;  % 0.0163
-CNR_hann = Chann/noisehan;    % 0.0086
-CNR_hamm = Chamm/noiseham;    % 0.0139
 
 
 %% Part 8 Constant F#

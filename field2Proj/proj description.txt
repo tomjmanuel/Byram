@@ -1,1 +1,4 @@
 simulate the effect of delay quantization on later psf
+
+maybe try dynamic receive (xdc_dynamic) with quant
+shoulld work at focus

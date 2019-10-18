@@ -23,19 +23,18 @@ max_sample=max([max(times)*fs 2*0.121/c*fs]);
 
 n=n+(max_sample-min_sample);
 env=zeros(round(n/D),no_lines);
-raw = env;
+
 for i=1:no_lines
   % very sneak way of adding zeros to beginning of image_data one line at a
   % time
   % [ A; B] concatenates arrays
   rf_env=abs(hilbert([zeros(round(times(i)*fs-min_sample),1); image_data(:,i)]));
-  rawa = [zeros(round(times(i)*fs-min_sample),1); image_data(:,i)];
-  % Here downsampling is performed
+ % Here downsampling is performed
   rf_env=rf_env(1:D:max(size(rf_env)));
   
   % store column in envelope image (2d array)
   env(1:max(size(rf_env)),i)=rf_env;
-  raw(1:max(size(rawa)),i) = rawa;
+
 end
 
 %  Do logarithmic compression to a 50 dB dynamic range

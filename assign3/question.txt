@@ -1,0 +1,3 @@
+ques for byram
+
+1. is transmit delay constant across elements for a given a line?
