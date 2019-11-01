@@ -1,0 +1,383 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>assign3_prob2try4</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-10-31"><meta name="DC.source" content="assign3_prob2try4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Prob2 assign 3</a></li><li><a href="#3">Inspect and filter sig</a></li><li><a href="#4">account for phase shift from filter</a></li></ul></div><pre class="codeinput"><span class="comment">% this gets noise_power: .3096, sig power: .1656, total: .4752</span>
+</pre><h2 id="2">Prob2 assign 3</h2><p>Tom Manuel Load in the data</p><pre class="codeinput">close <span class="string">all</span>
+clear <span class="string">all</span>
+load(<span class="string">'Assignment3_problem2.mat'</span>)
+
+sig = nonStaData.signal;
+noi = nonStaData.noise;
+f0 = nonStaData.f0;
+fs = nonStaData.fs;
+RF = nonStaData.sigAndNoise;
+</pre><h2 id="3">Inspect and filter sig</h2><p>get center of spectrum for each window</p><pre class="codeinput">Nz = length(sig);
+wsp=8;
+WS = wsp*506; <span class="comment">%window size</span>
+front=1;
+back=WS;
+nWin = ceil(Nz/WS);
+close <span class="string">all</span>
+figure
+
+cFs = zeros([nWin 1]); <span class="comment">% capture center of spectral support for window</span>
+lFs = cFs; <span class="comment">% lower bound of filter</span>
+hFs = cFs; <span class="comment">% upper bound of filter</span>
+
+<span class="comment">% create arrays to store recombined filtered signals</span>
+filtSig = zeros([Nz 1]);
+filtNoise = filtSig;
+filtRF = filtSig;
+
+depthFactor = linspace(3,2,nWin);
+
+<span class="keyword">for</span> i=1:nWin
+    <span class="keyword">if</span> back&gt;Nz
+        back=Nz;
+    <span class="keyword">end</span>
+    chunk = sig(front:back);
+    chunk2 = noi(front:back);
+    chunk3 = RF(front:back);
+    Fchunk = fftshift(abs(fft(chunk)));
+    Fchunk2 = fftshift(abs(fft(chunk2)));
+    Fchunk3 = fftshift(abs(fft(chunk3)));
+
+    <span class="comment">% polyfit to spectral support to estimate center and bandwidth</span>
+    foo1 = Fchunk;
+    endInd = WS/2 + wsp*60;
+    x=1:length(foo1(WS/2:endInd));
+    f = polyfit(x',foo1(WS/2:endInd),10);
+    ff = polyval(f,x); <span class="comment">%ff is a poly fit to spectral support</span>
+
+    [val, ind]=max(ff);
+    cFs(i)=abs(ind/2)/(WS/2); <span class="comment">% get max in terms of filter parameters</span>
+
+    <span class="comment">% use ff to find bandwidth parameters</span>
+    <span class="comment">%crit = 3; %2 would search FWHM</span>
+    crit = depthFactor(i);
+    lpar = 1; <span class="comment">%bias low cutoff to be further from center</span>
+    hpar = 1;
+    <span class="comment">% get lower bound</span>
+    [~,indL] = min(abs(ff(1:ind)-val/(lpar*crit)));
+    lFs(i) = (indL/2)/(WS/2);
+    <span class="comment">%lFs(i) = 0.001;</span>
+
+    <span class="comment">% get upper bound</span>
+    [~,indH] = min(abs(ff(ind:end)-val/(hpar*crit)));
+    indH = indH + ind;
+    indH2 = indH;
+    <span class="keyword">if</span> indH2&gt;length(ff)
+        indH2=length(ff); <span class="comment">%just for plotting purposes</span>
+    <span class="keyword">end</span>
+    hFs(i) = ((indH)/2)/(WS/2);
+    <span class="comment">%hFs(i) = .5;</span>
+
+    <span class="comment">% visualize the moving spectral support along with the filter</span>
+    <span class="comment">% parameters for each time window</span>
+    subplot(311)
+    plot(Fchunk)
+    subplot(312)
+    hold <span class="string">off</span>
+    plot(x,ff,x,foo1(WS/2:endInd))
+    hold <span class="string">on</span>
+    plot(indL,ff(indL),<span class="string">'*'</span>)
+    plot(indH,ff(indH),<span class="string">'*'</span>)
+<span class="comment">%     plot(Fchunk2)</span>
+<span class="comment">%     subplot(313)</span>
+<span class="comment">%     plot(Fchunk3)</span>
+    title(<span class="string">'spectral support for this time window, * shows cutoffs'</span>)
+    pause(.11)
+
+    <span class="comment">% apply filter to window</span>
+    b = fir1(10,[lFs(i) hFs(i)]);
+    filtSig(front:back) = filter(b,1,chunk); <span class="comment">%sig</span>
+    filtNoise(front:back) = filter(b,1,chunk2); <span class="comment">%noise</span>
+    filtRF(front:back) = filter(b,1,chunk3); <span class="comment">%RF</span>
+
+    front=back+1;
+    back=back+WS;
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Warning: Polynomial is
+badly conditioned. Add
+points with distinct X
+values, reduce the
+degree of the
+polynomial, or try
+centering and scaling as
+described in HELP
+POLYFIT. 
+Warning: Polynomial is
+badly conditioned. Add
+points with distinct X
+values, reduce the
+degree of the
+polynomial, or try
+centering and scaling as
+described in HELP
+POLYFIT. 
+</pre><img vspace="5" hspace="5" src="assign3_prob2try4_01.png" alt=""> <h2 id="4">account for phase shift from filter</h2><pre class="codeinput">shiftSamp = -5;
+t=1:Nz;
+filtSig = interp1(t+shiftSamp,filtSig,t);
+filtSig(isnan(filtSig))=0;
+
+<span class="comment">% account for damping from filter</span>
+<span class="comment">% have to also do this to noise to be fair</span>
+dampFact= 1.1;
+filtSig = filtSig.*dampFact;
+filtNoise = filtNoise.*dampFact;
+
+<span class="comment">%</span>
+<span class="comment">% ouput results</span>
+noise_power = mean(filtNoise.^2)
+signal_error_power = mean((filtSig' -sig).^2)
+
+total = noise_power + signal_error_power
+
+<span class="comment">%</span>
+figure
+subplot(211)
+plot(noi)
+hold <span class="string">on</span>
+plot(filtNoise)
+subplot(212)
+plot(sig(1:300))
+hold <span class="string">on</span>
+plot(filtSig(1:300))
+</pre><pre class="codeoutput">
+noise_power =
+
+    0.3096
+
+
+signal_error_power =
+
+    0.1656
+
+
+total =
+
+    0.4752
+
+</pre><img vspace="5" hspace="5" src="assign3_prob2try4_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% this gets noise_power: .3096, sig power: .1656, total: .4752
+
+
+%% Prob2 assign 3
+% Tom Manuel
+% Load in the data
+
+close all
+clear all
+load('Assignment3_problem2.mat')
+
+sig = nonStaData.signal;
+noi = nonStaData.noise;
+f0 = nonStaData.f0;
+fs = nonStaData.fs;
+RF = nonStaData.sigAndNoise;
+
+%% Inspect and filter sig
+% get center of spectrum for each window
+
+Nz = length(sig);
+wsp=8;
+WS = wsp*506; %window size
+front=1;
+back=WS;
+nWin = ceil(Nz/WS);
+close all
+figure
+
+cFs = zeros([nWin 1]); % capture center of spectral support for window
+lFs = cFs; % lower bound of filter
+hFs = cFs; % upper bound of filter
+
+% create arrays to store recombined filtered signals
+filtSig = zeros([Nz 1]);
+filtNoise = filtSig;
+filtRF = filtSig;
+
+depthFactor = linspace(3,2,nWin);
+
+for i=1:nWin
+    if back>Nz
+        back=Nz;
+    end
+    chunk = sig(front:back);
+    chunk2 = noi(front:back);
+    chunk3 = RF(front:back);
+    Fchunk = fftshift(abs(fft(chunk)));
+    Fchunk2 = fftshift(abs(fft(chunk2)));
+    Fchunk3 = fftshift(abs(fft(chunk3)));
+    
+    % polyfit to spectral support to estimate center and bandwidth
+    foo1 = Fchunk;
+    endInd = WS/2 + wsp*60;
+    x=1:length(foo1(WS/2:endInd));
+    f = polyfit(x',foo1(WS/2:endInd),10);
+    ff = polyval(f,x); %ff is a poly fit to spectral support
+    
+    [val, ind]=max(ff);
+    cFs(i)=abs(ind/2)/(WS/2); % get max in terms of filter parameters
+    
+    % use ff to find bandwidth parameters 
+    %crit = 3; %2 would search FWHM
+    crit = depthFactor(i);
+    lpar = 1; %bias low cutoff to be further from center
+    hpar = 1;
+    % get lower bound
+    [~,indL] = min(abs(ff(1:ind)-val/(lpar*crit)));
+    lFs(i) = (indL/2)/(WS/2);
+    %lFs(i) = 0.001;
+    
+    % get upper bound
+    [~,indH] = min(abs(ff(ind:end)-val/(hpar*crit)));
+    indH = indH + ind;
+    indH2 = indH;
+    if indH2>length(ff)
+        indH2=length(ff); %just for plotting purposes
+    end
+    hFs(i) = ((indH)/2)/(WS/2);
+    %hFs(i) = .5;
+    
+    % visualize the moving spectral support along with the filter
+    % parameters for each time window
+    subplot(311)
+    plot(Fchunk)
+    subplot(312)
+    hold off
+    plot(x,ff,x,foo1(WS/2:endInd))
+    hold on
+    plot(indL,ff(indL),'*')
+    plot(indH,ff(indH),'*')
+%     plot(Fchunk2)
+%     subplot(313)
+%     plot(Fchunk3)
+    title('spectral support for this time window, * shows cutoffs')
+    pause(.11)
+    
+    % apply filter to window
+    b = fir1(10,[lFs(i) hFs(i)]);
+    filtSig(front:back) = filter(b,1,chunk); %sig
+    filtNoise(front:back) = filter(b,1,chunk2); %noise
+    filtRF(front:back) = filter(b,1,chunk3); %RF
+    
+    front=back+1;
+    back=back+WS;
+end
+
+%% account for phase shift from filter
+shiftSamp = -5;
+t=1:Nz;
+filtSig = interp1(t+shiftSamp,filtSig,t);
+filtSig(isnan(filtSig))=0;
+
+% account for damping from filter
+% have to also do this to noise to be fair
+dampFact= 1.1;
+filtSig = filtSig.*dampFact;
+filtNoise = filtNoise.*dampFact;
+
+%
+% ouput results
+noise_power = mean(filtNoise.^2)
+signal_error_power = mean((filtSig' -sig).^2)
+
+total = noise_power + signal_error_power
+
+%
+figure
+subplot(211)
+plot(noi)
+hold on
+plot(filtNoise)
+subplot(212)
+plot(sig(1:300))
+hold on
+plot(filtSig(1:300))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>
